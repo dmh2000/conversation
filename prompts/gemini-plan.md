@@ -66,7 +66,7 @@ gemini/
 1.  Create `gemini` directory.
 2.  Initialize `gemini/server` with `npm init -y`.
 3.  Install backend dependencies: `express`, `ws`, `@types/ws`, `@types/express`, `@types/node`, `typescript`, `ts-node`, `nodemon`.
-4.  Initialize `gemini/client` using `npm create vite@latest client -- --template react-ts`.
+4.  Initialize `gemini/client` using `npx create-vite client --template react-ts --no-interactive`.
 5.  Install frontend dependencies (`npm install`).
 
 ### Phase 2: Backend Implementation
