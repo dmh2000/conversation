@@ -34,3 +34,16 @@ Using the information in this file, generate a detailed plan for building the ap
 If you find any errors or inconsistencies in this description, stop and tell me the problem. Only create the plan when this description has no problems.
 
 do not create the app yet. but when you do, place the app and its components in directory 'claude'. 
+
+-----------------------------------------------------------------------------
+when i run the client I get a blank screen and an error message "Uncaught SyntaxError: The requested module '/src/services/websocketClient.ts' does not provide an export named 'Message' (at App.tsx:2:24)"
+
+-----------------------------------------------------------------------------
+claude/client/App.tsx has this error in the editor : Message' is a type and must be
+ imported using a type-only import when 'verbatimModuleSyntax' is enabled.ts(1484)
+
+ ----------------------------------------------------------------------------
+ @claude/client modify the main client web page as follows:
+ - change the title from "WebSocket Messaging App" to "Bob"
+ - center everything
+ - make the "Message:" box and the "Audio:" text areas use 80% of the width

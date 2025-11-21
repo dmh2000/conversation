@@ -1,7 +1,8 @@
 .app {
-  max-width: 900px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 header {
@@ -39,6 +40,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  align-items: center;
 }
 
 .message-display,
@@ -47,6 +49,9 @@ main {
   padding: 2rem;
   border-radius: 12px;
   border: 2px solid #333;
+  width: 80vw;
+  max-width: 80vw;
+  box-sizing: border-box;
 }
 
 .message-display h2,

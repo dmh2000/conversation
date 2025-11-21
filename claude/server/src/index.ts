@@ -33,5 +33,5 @@ initTcpListener();
 httpServer.listen(PORT, () => {
   console.log(`HTTP server listening on port ${PORT}`);
   console.log(`WebSocket server ready`);
-  console.log(`Serving static files from /audio`);
+  console.log(`Serving static files from /public`);
 });

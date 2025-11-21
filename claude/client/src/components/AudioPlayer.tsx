@@ -25,7 +25,7 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
     <div className="audio-player">
       <h2>Audio:</h2>
       {audioPath ? (
-        <audio ref={audioRef} controls>
+        <audio ref={audioRef} controls autoPlay>
           <source src={audioPath} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>

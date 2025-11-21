@@ -35,5 +35,5 @@ if (args.length >= 2) {
 } else {
   console.log('Usage: node test-tcp-client.js "Your message text" "/audio/filename.mp3"');
   console.log('\nSending default test message...');
-  sendMessage('Hello from TCP client!', '/audio/test.mp3');
+  sendMessage('Hello from TCP client!', '/audio/audio-1.mp3');
 }

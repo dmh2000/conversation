@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useWebSocket, Message } from './services/websocketClient';
+import { useWebSocket } from './services/websocketClient';
+import type { Message } from './services/websocketClient';
 import { MessageDisplay } from './components/MessageDisplay';
 import { AudioPlayer } from './components/AudioPlayer';
 import './App.css';
@@ -16,7 +17,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>WebSocket Messaging App</h1>
+        <h1>Bob</h1>
         <div className={`status ${isConnected ? 'connected' : 'disconnected'}`}>
           {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
         </div>

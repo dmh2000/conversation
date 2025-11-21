@@ -17,7 +17,7 @@ TCP Client → TCP Listener (Port 8080) → WebSocket Server → React Web App
 ```json
 {
   "text": "string",  // Text to be displayed on the web page
-  "audio": "string"  // Path to MP3 audio file (e.g., "/audio/test.mp3")
+  "audio": "string"  // Path to MP3 audio file (e.g., "/test.mp3")
 }
 ```
 
@@ -97,7 +97,7 @@ Use the included test script to send messages via TCP:
 
 ```bash
 cd server
-node test-tcp-client.js "Hello World!" "/audio/test.mp3"
+node test-tcp-client.js "Hello World!" "/test.mp3"
 ```
 
 Or without arguments to send a default test message:
@@ -111,7 +111,7 @@ node test-tcp-client.js
 You can also use netcat to send JSON messages:
 
 ```bash
-echo '{"text":"Test message","audio":"/audio/test.mp3"}' | nc localhost 8080
+echo '{"text":"Test message","audio":"/test.mp3"}' | nc localhost 8080
 ```
 
 ## How It Works
