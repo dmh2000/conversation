@@ -44,4 +44,5 @@ Do not create the app yet. but when you do, place the app and its components in 
 ## also modify prompts/gemini-plan.md so it reflects this change in the app behavior
 
 --------------------------------------------------------------------
-modify the gemini server so 
+@gemini/server/src/index.ts modify gemini server so that its express server will serve  
+  any files stored in gemini/server/public 

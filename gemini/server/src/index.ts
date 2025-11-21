@@ -2,8 +2,11 @@ import express from 'express';
 import http from 'http';
 import WebSocket from 'ws';
 import net from 'net';
+import path from 'path';
 
 const app = express();
+app.use(express.static(path.join(__dirname, '../public')));
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
