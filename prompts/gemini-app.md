@@ -34,3 +34,14 @@ Using the information in this file, generate a detailed plan for building the ap
 If you find any errors or inconsistencies in this description, stop and tell me the problem. Only create the plan when this description has no problems.
 
 Do not create the app yet. but when you do, place the app and its components in directory 'gemini'. 
+
+--------------------------------------------------------------------
+# browser security rules prevent playing an audio file if the user has not interacted with the web app at least one.
+## modify the gemini web app as follows:
+- make the changes to the app in directory 'gemini'
+- when the home page is first displayed, show only a button labeled 'Start'
+- when the Start button is clicked, show the original page with the text and audio player
+## also modify prompts/gemini-plan.md so it reflects this change in the app behavior
+
+--------------------------------------------------------------------
+modify the gemini server so 

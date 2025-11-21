@@ -49,9 +49,9 @@ gemini/
 **Technologies:** Vite, React, TypeScript.
 
 **Responsibilities:**
-1.  **UI Layout:** A simple, clean interface to display the received text.
+1.  **UI Layout:** A simple, clean interface. Initially, it will only show a "Start" button to ensure user interaction before any audio is played. After clicking "Start", it will display the received text.
 2.  **WebSocket Client:**
-    *   Connect to `ws://localhost:3000` (or backend port) on mount.
+    *   Connect to `ws://localhost:3000` (or backend port) only after the "Start" button is clicked.
     *   Handle `onopen`, `onmessage`, `onclose`, `onerror`.
 3.  **Message Handling:**
     *   Update React state `displayMessage` with the `text` field.
@@ -78,13 +78,15 @@ gemini/
 
 ### Phase 3: Frontend Implementation
 1.  Update `gemini/client/src/App.tsx`.
-2.  Add state: `const [message, setMessage] = useState<string>('')`.
-3.  Add `useEffect` to establish the WebSocket connection.
-4.  On `message` event:
+2.  Add state: `const [message, setMessage] = useState<string>('')` and `const [isStarted, setIsStarted] = useState(false)`.
+3.  Render a "Start" button if `isStarted` is false.
+4.  When the button is clicked, set `isStarted` to true.
+5.  Add `useEffect` to establish the WebSocket connection, with `isStarted` as a dependency.
+6.  On `message` event:
     *   `JSON.parse(event.data)`.
     *   `setMessage(data.text)`.
     *   `new Audio(data.audio).play()` (Handle potential browser autoplay policies).
-5.  Add basic styling (CSS) to make the text large and readable.
+7.  Add basic styling (CSS) to make the text large and readable.
 
 ### Phase 4: Integration & Verification
 1.  Start Backend: `npm run dev` (server).

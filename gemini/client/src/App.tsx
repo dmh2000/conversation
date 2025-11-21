@@ -8,8 +8,11 @@ interface Message {
 
 function App() {
   const [message, setMessage] = useState<string>('Waiting for message...');
+  const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
+    if (!isStarted) return;
+
     const ws = new WebSocket('ws://localhost:3000');
 
     ws.onopen = () => {
@@ -43,13 +46,23 @@ function App() {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [isStarted]);
+
+  const handleStart = () => {
+    setIsStarted(true);
+  };
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Real-time Message Display</h1>
-        <p className="message">{message}</p>
+        {!isStarted ? (
+          <button onClick={handleStart}>Start</button>
+        ) : (
+          <>
+            <h1>Real-time Message Display</h1>
+            <p className="message">{message}</p>
+          </>
+        )}
       </header>
     </div>
   );

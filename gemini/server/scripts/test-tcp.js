@@ -10,7 +10,7 @@ client.connect(TCP_PORT, HOST, () => {
 
     const message = {
         text: "Hello from TCP client!",
-        audio: "http://localhost:5173/audio-1.mp3"
+        audio: "http://localhost:3000/audio-1.mp3"
     };
 
     // Send the message as a JSON string
