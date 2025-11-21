@@ -1,0 +1,70 @@
+import { useEffect, useRef, useCallback, useState } from 'react';
+
+export interface Message {
+  text: string;
+  audio: string;
+}
+
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
+
+export function useWebSocket(onMessage: (message: Message) => void) {
+  const wsRef = useRef<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const reconnectTimeoutRef = useRef<number>();
+
+  const connect = useCallback(() => {
+    try {
+      const ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        setIsConnected(true);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data) as Message;
+          console.log('Received message:', message);
+          onMessage(message);
+        } catch (error) {
+          console.error('Failed to parse message:', error);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        setIsConnected(false);
+        wsRef.current = null;
+
+        // Attempt to reconnect after 3 seconds
+        reconnectTimeoutRef.current = window.setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connect();
+        }, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      wsRef.current = ws;
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+    }
+  }, [onMessage]);
+
+  useEffect(() => {
+    connect();
+
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [connect]);
+
+  return { isConnected };
+}
