@@ -1,10 +1,16 @@
 import express from 'express';
+import cors from 'cors';
 import http from 'http';
 import WebSocket from 'ws';
 import net from 'net';
 import path from 'path';
 
 const app = express();
+
+// Enable CORS for all origins (adjust in production)
+app.use(cors());
+
+// Serve static files (for MP3 audio files)
 app.use(express.static(path.join(__dirname, '../public')));
 
 const server = http.createServer(app);

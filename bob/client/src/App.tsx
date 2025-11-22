@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import { AudioPlayer } from './components/AudioPlayer';
 
 interface Message {
   text: string;
@@ -109,7 +110,7 @@ function App() {
           <>
             <h1>Bob</h1>
             <p className="message">{message}</p>
-            {currentAudio && <audio controls src={currentAudio} autoPlay />}
+            <AudioPlayer audioPath={currentAudio || ''} />
           </>
         )}
       </header>
