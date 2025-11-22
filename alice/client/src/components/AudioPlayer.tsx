@@ -14,10 +14,6 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
       // Load and play the new audio file
       audio.src = audioPath;
       audio.load();
-
-      audio.play().catch((error) => {
-        console.error('Failed to play audio:', error);
-      });
     }
   }, [audioPath]);
 

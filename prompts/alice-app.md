@@ -19,7 +19,7 @@ create a web app as follows:
 - the web socket server will listen on a separate TCP port for a JSON message as described, and when it receives a message it will then forward the message to the web app on the web socket server. 
 - use the opening and closing braces to delimit the message when receving it on the TCP port.
 
-place the app and all its components in the 'claude' directory
+place the app and all its components in the 'alice' directory
 
 here's an example of the data flow using mermaid syntax
 
@@ -33,19 +33,26 @@ here's an example of the data flow using mermaid syntax
 Using the information in this file, generate a detailed plan for building the app and all its components. 
 If you find any errors or inconsistencies in this description, stop and tell me the problem. Only create the plan when this description has no problems.
 
-do not create the app yet. but when you do, place the app and its components in directory 'claude'. 
+do not create the app yet. but when you do, place the app and its components in directory 'alice'. 
 
 -----------------------------------------------------------------------------
 when i run the client I get a blank screen and an error message "Uncaught SyntaxError: The requested module '/src/services/websocketClient.ts' does not provide an export named 'Message' (at App.tsx:2:24)"
 
 -----------------------------------------------------------------------------
-claude/client/App.tsx has this error in the editor : Message' is a type and must be
+alice/client/App.tsx has this error in the editor : Message' is a type and must be
  imported using a type-only import when 'verbatimModuleSyntax' is enabled.ts(1484)
 
  ----------------------------------------------------------------------------
- @claude/client modify the main client web page as follows:
+ @alice/client modify the main client web page as follows:
  - change the title from "WebSocket Messaging App" to "Alice"
  - center everything
  - make the "Message:" box and the "Audio:" text areas use 80% of the full window width
  -----------------------------------------------------------------------------
- @claude/client when the client receives a message, it should play the audio automatically
+ @alice/client when the client receives a message, it should play the audio automatically
+ ------------------------------------------------------------------------------------
+ @alice/client the browser does not allow the mp3 to autoplay until the user interacts with the app.
+ - in the main page, when it is first displayed:
+   - show the title "Alice"
+   - show a button named "Start" 
+     - when the Start button is clicked, change the page to the original page with the title, text and audio file. 
+     - this will enable the browser to play the audio

@@ -6,6 +6,7 @@ import { AudioPlayer } from './components/AudioPlayer';
 import './App.css';
 
 function App() {
+  const [isStarted, setIsStarted] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<Message | null>(null);
 
   const handleMessage = useCallback((message: Message) => {
@@ -13,6 +14,15 @@ function App() {
   }, []);
 
   const { isConnected } = useWebSocket(handleMessage);
+
+  if (!isStarted) {
+    return (
+      <div className="app start-screen">
+        <h1>Alice</h1>
+        <button onClick={() => setIsStarted(true)}>Start</button>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
