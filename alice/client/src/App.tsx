@@ -10,6 +10,13 @@ function App() {
   const [currentMessage, setCurrentMessage] = useState<Message | null>(null);
 
   const handleMessage = useCallback((message: Message) => {
+    console.log('Received message:', message);
+    // Prepend server origin to audio path if it's relative
+    if (message.audio && message.audio.startsWith('/')) {
+      // Assuming server is on localhost:3000 for dev
+      message.audio = `http://localhost:3000${message.audio}`;
+      console.log('Converted audio path to:', message.audio);
+    }
     setCurrentMessage(message);
   }, []);
 
