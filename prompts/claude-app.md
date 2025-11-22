@@ -44,6 +44,8 @@ claude/client/App.tsx has this error in the editor : Message' is a type and must
 
  ----------------------------------------------------------------------------
  @claude/client modify the main client web page as follows:
- - change the title from "WebSocket Messaging App" to "Bob"
+ - change the title from "WebSocket Messaging App" to "Alice"
  - center everything
- - make the "Message:" box and the "Audio:" text areas use 80% of the width
+ - make the "Message:" box and the "Audio:" text areas use 80% of the full window width
+ -----------------------------------------------------------------------------
+ @claude/client when the client receives a message, it should play the audio automatically

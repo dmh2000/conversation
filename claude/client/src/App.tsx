@@ -17,7 +17,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>Bob</h1>
+        <h1>Alice</h1>
         <div className={`status ${isConnected ? 'connected' : 'disconnected'}`}>
           {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
         </div>
