@@ -46,3 +46,16 @@ Do not create the app yet. but when you do, place the app and its components in 
 --------------------------------------------------------------------
 @gemini/server/src/index.ts modify gemini server so that its express server will serve  
   any files stored in gemini/server/public 
+
+-----------------------------------------------------------------------------
+@bob when bob/client1 starts, it displays a button named "Start". Make the following changes:
+- show a header that says "Bob". locate it in the center of the window
+- place a text entry area in the center of the window. the user can type in the text area with a limit of 256 words. the text area should use 80% of the window and should expand if more room is needed to enter the text.
+- replace the "Start" button with a "Go Ask Alice" button. disable the button until the user has entered text in the text area
+- when the "Go Ask Alice" button clicked, send the contents of the text area to the websocket server. then transition the display to the existing page that shows text and audio.
+
+-------------------------------------------------------------------
+@bob/client change the text 'Real-time Message Display' to "Bob"
+- show the controls for the audio playback when there is one
+-------------------------------------------------------------------
+@bob/client make the player controls the same width as the text area

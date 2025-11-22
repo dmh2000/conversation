@@ -16,6 +16,17 @@ const TCP_PORT = 3001;
 // WebSocket server logic
 wss.on('connection', ws => {
   console.log('WebSocket client connected');
+  ws.on('message', message => {
+    try {
+      const receivedMessage = JSON.parse(message.toString());
+      if (receivedMessage.text) {
+        console.log('Received from WebSocket client:', receivedMessage.text);
+        // Optionally, broadcast this message to other clients or process it further
+      }
+    } catch (error) {
+      console.error('Failed to parse WebSocket message:', error);
+    }
+  });
   ws.on('close', () => {
     console.log('WebSocket client disconnected');
   });
