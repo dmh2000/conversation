@@ -56,3 +56,5 @@ alice/client/App.tsx has this error in the editor : Message' is a type and must 
    - show a button named "Start" 
      - when the Start button is clicked, change the page to the original page with the title, text and audio file. 
      - this will enable the browser to play the audio
+----------------------------------------------------------
+@alice/client/AudioPlayer.tsx change the audio player to use the wavesurfer player and show the wave form when an mp3 is plaing
