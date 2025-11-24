@@ -24,23 +24,33 @@ function App() {
 
   if (!isStarted) {
     return (
-      <div className="app start-screen">
+      <div className="app start-screen" role="main">
         <h1>Alice</h1>
-        <button onClick={() => setIsStarted(true)}>Start</button>
+        <button
+          onClick={() => setIsStarted(true)}
+          aria-label="Start Alice messaging interface"
+        >
+          Start
+        </button>
       </div>
     );
   }
 
   return (
     <div className="app">
-      <header>
+      <header role="banner">
         <h1>Alice</h1>
-        <div className={`status ${isConnected ? 'connected' : 'disconnected'}`}>
-          {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+        <div
+          className={`status ${isConnected ? 'connected' : 'disconnected'}`}
+          role="status"
+          aria-live="polite"
+          aria-label={isConnected ? 'Connected to server' : 'Disconnected from server'}
+        >
+          {isConnected ? 'Connected' : 'Disconnected'}
         </div>
       </header>
 
-      <main>
+      <main role="main">
         <MessageDisplay text={currentMessage?.text || ''} />
         <AudioPlayer audioPath={currentMessage?.audio || ''} />
       </main>

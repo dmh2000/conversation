@@ -11,13 +11,14 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
     url: audioPath || undefined,
-    waveColor: '#41D1FF',
-    progressColor: '#BD34FE',
-    cursorColor: '#ffffff',
-    barWidth: 2,
-    barGap: 3,
-    height: 100,
+    waveColor: '#00fff0',        // Neon cyan
+    progressColor: '#ff006e',    // Hot magenta
+    cursorColor: '#4d4dff',      // Neon blue
+    barWidth: 3,
+    barGap: 2,
+    height: 250,                 // Massive waveform
     autoplay: true,
+    barRadius: 2,
   });
 
   // Load new audio when audioPath changes
@@ -50,14 +51,14 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   }, [wavesurfer, audioPath]);
 
   return (
-    <div className="audio-player">
+    <div className="audio-player" role="region" aria-label="Audio player">
       <h2>Audio:</h2>
       {audioPath ? (
-        <div style={{ width: '100%' }}>
-          <div ref={containerRef} style={{ width: '100%' }} />
+        <div style={{ width: '100%' }} aria-label="Audio waveform visualization">
+          <div ref={containerRef} style={{ width: '100%' }} role="application" aria-label="Audio playback controls" />
         </div>
       ) : (
-        <p>No audio to play</p>
+        <p role="status">No audio to play</p>
       )}
     </div>
   );

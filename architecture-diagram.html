@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Comparison: Bob vs Alice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #131829;
+            --accent-websocket: #00d9ff;
+            --accent-tcp: #ff6b9d;
+            --accent-data: #ffd60a;
+            --component-bg: #1a1f3a;
+            --component-border: #2d3561;
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --glow-websocket: rgba(0, 217, 255, 0.3);
+            --glow-tcp: rgba(255, 107, 157, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(45, 53, 97, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 53, 97, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-websocket), var(--accent-tcp));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 4rem;
+            font-family: 'IBM Plex Mono', monospace;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .system {
+            position: relative;
+        }
+
+        .system-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .system-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-websocket), transparent);
+        }
+
+        .system:nth-child(2) .system-title::after {
+            background: linear-gradient(90deg, transparent, var(--accent-tcp), transparent);
+        }
+
+        .component-wrapper {
+            position: relative;
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .component {
+            background: var(--component-bg);
+            border: 2px solid var(--component-border);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+
+        .component.narrow {
+            width: 60%;
+        }
+
+        .component:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-websocket);
+        }
+
+        .system:nth-child(2) .component:hover {
+            border-color: var(--accent-tcp);
+        }
+
+        .component-label {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* WebSocket connection that bypasses Client */
+        .websocket-connection {
+            position: absolute;
+            right: 12%;
+            top: 50%;
+            width: 3px;
+            height: calc(200% + 5rem);
+            z-index: 5;
+        }
+
+        .websocket-line {
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            background: var(--accent-websocket);
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--glow-websocket);
+        }
+
+        /* Bob - bidirectional arrows */
+        .bob .websocket-line::before,
+        .bob .websocket-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            filter: drop-shadow(0 0 4px var(--glow-websocket));
+        }
+
+        .bob .websocket-line::before {
+            top: 0;
+            border-bottom: 12px solid var(--accent-websocket);
+        }
+
+        .bob .websocket-line::after {
+            bottom: 0;
+            border-top: 12px solid var(--accent-websocket);
+        }
+
+        /* Alice - unidirectional upward arrow */
+        .alice .websocket-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--accent-websocket);
+            filter: drop-shadow(0 0 4px var(--glow-websocket));
+        }
+
+        .websocket-label {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-websocket);
+            background: var(--bg-primary);
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+            border: 1px solid var(--accent-websocket);
+            box-shadow: 0 0 10px var(--glow-websocket);
+            white-space: nowrap;
+        }
+
+        .connection {
+            position: absolute;
+            left: 50%;
+            bottom: -2.5rem;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .connection-line {
+            width: 3px;
+            height: 2.5rem;
+            background: var(--accent-tcp);
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .connection-line::before,
+        .connection-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            filter: drop-shadow(0 0 4px var(--glow-tcp));
+        }
+
+        .connection-line::before {
+            top: 0;
+            border-bottom: 12px solid var(--accent-tcp);
+        }
+
+        .connection-line::after {
+            bottom: 0;
+            border-top: 12px solid var(--accent-tcp);
+        }
+
+        .connection-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-tcp);
+            background: var(--component-bg);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--accent-tcp);
+            box-shadow: 0 0 10px var(--glow-tcp);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* AI-to-AI connection */
+        .ai-bridge {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 6rem;
+            height: 3px;
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .ai-bridge-line {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            height: 3px;
+            background: var(--accent-data);
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 12px rgba(255, 214, 10, 0.4);
+        }
+
+        .ai-bridge-line::before,
+        .ai-bridge-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            filter: drop-shadow(0 0 4px rgba(255, 214, 10, 0.4));
+        }
+
+        .ai-bridge-line::before {
+            left: 0;
+            border-right: 12px solid var(--accent-data);
+        }
+
+        .ai-bridge-line::after {
+            right: 0;
+            border-left: 12px solid var(--accent-data);
+        }
+
+        /* Cross-system communication */
+        .communication {
+            position: relative;
+            margin-top: 4rem;
+            padding: 3rem;
+            background: rgba(26, 31, 58, 0.5);
+            border: 2px dashed var(--component-border);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .communication-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.25rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--accent-data);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .data-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .ai-component {
+            flex: 1;
+            background: var(--component-bg);
+            border: 2px solid var(--accent-data);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(255, 214, 10, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .ai-component:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 214, 10, 0.4);
+        }
+
+        .flow-arrows {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .arrow {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .arrow-line {
+            flex: 1;
+            height: 2px;
+            background: var(--accent-data);
+            position: relative;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid var(--accent-data);
+        }
+
+        .arrow-line.reverse {
+            background: linear-gradient(to left, var(--accent-data), transparent);
+        }
+
+        .arrow-line.reverse::after {
+            right: auto;
+            left: 0;
+            border-left: none;
+            border-right: 10px solid var(--accent-data);
+        }
+
+        .arrow-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--accent-data);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            min-width: 100px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            padding: 2rem;
+            background: rgba(26, 31, 58, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .legend-dot.websocket {
+            background: var(--accent-websocket);
+            color: var(--glow-websocket);
+        }
+
+        .legend-dot.tcp {
+            background: var(--accent-tcp);
+            color: var(--glow-tcp);
+        }
+
+        .legend-dot.data {
+            background: var(--accent-data);
+            color: rgba(255, 214, 10, 0.3);
+        }
+
+        @media (max-width: 968px) {
+            .architecture-grid {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .data-flow {
+                flex-direction: column;
+            }
+        }
+
+        /* Decorative elements */
+        .deco-circle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .deco-circle-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--glow-websocket), transparent);
+            top: 10%;
+            right: 10%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .deco-circle-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--glow-tcp), transparent);
+            bottom: 10%;
+            left: 10%;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="deco-circle deco-circle-1"></div>
+    <div class="deco-circle deco-circle-2"></div>
+
+    <div class="container">
+        <h1>Architecture Comparison</h1>
+        <p class="subtitle">System Architecture: Bob vs Alice Implementation</p>
+
+        <div class="architecture-grid">
+            <!-- Bob System -->
+            <div class="system bob">
+                <h2 class="system-title">Bob</h2>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">Browser</div>
+                    </div>
+                    <!-- WebSocket connection from Browser to Server -->
+                    <div class="websocket-connection">
+                        <div class="websocket-line"></div>
+                        <div class="websocket-label">WebSocket</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component narrow">
+                        <div class="component-label">Web Server</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">File Server</div>
+                        <div class="connection">
+                            <div class="connection-line"></div>
+                            <div class="connection-label">TCP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">AI</div>
+                    </div>
+                    <!-- AI-to-AI bridge -->
+                    <div class="ai-bridge">
+                        <div class="ai-bridge-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alice System -->
+            <div class="system alice">
+                <h2 class="system-title">Alice</h2>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">Browser</div>
+                    </div>
+                    <!-- WebSocket connection from Browser to Server -->
+                    <div class="websocket-connection">
+                        <div class="websocket-line"></div>
+                        <div class="websocket-label">WebSocket</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component narrow">
+                        <div class="component-label">Web Server</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">File Server</div>
+                        <div class="connection">
+                            <div class="connection-line"></div>
+                            <div class="connection-label">TCP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">AI</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cross-system communication -->
+        <div class="communication">
+            <div class="communication-title">AI Communication Layer</div>
+            <div class="data-flow">
+                <div class="ai-component">AI (Bob)</div>
+
+                <div class="flow-arrows">
+                    <div class="arrow">
+                        <div class="arrow-label">Questions</div>
+                        <div class="arrow-line"></div>
+                    </div>
+                    <div class="arrow">
+                        <div class="arrow-line reverse"></div>
+                        <div class="arrow-label">Answers</div>
+                    </div>
+                </div>
+
+                <div class="ai-component">AI (Alice)</div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot websocket"></div>
+                <span>WebSocket Connection</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot tcp"></div>
+                <span>TCP Connection</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot data"></div>
+                <span>Data Exchange</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

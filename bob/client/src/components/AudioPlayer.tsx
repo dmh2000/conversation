@@ -11,16 +11,16 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
     url: audioPath || undefined,
-    waveColor: '#41D1FF',
-    progressColor: '#BD34FE',
-    cursorColor: '#ffffff',
+    waveColor: '#7a9b8e',        // Sage green (--color-sage)
+    progressColor: '#c45e3f',    // Terracotta (--color-terracotta)
+    cursorColor: '#b8956a',      // Gold (--color-gold)
     barWidth: 2,
-    barGap: 3,
-    height: 100,
+    barGap: 4,
+    height: 180,                 // Editorial height
     autoplay: true,
+    barRadius: 2,
   });
 
-  // Load new audio when audioPath changes
   useEffect(() => {
     if (!wavesurfer || !audioPath || audioPath.trim() === '') return;
 
@@ -50,14 +50,19 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   }, [wavesurfer, audioPath]);
 
   return (
-    <div className="audio-player">
-      <h2>Audio:</h2>
+    <div className="audio-player" role="region" aria-label="Audio player">
+      <h2>Audio Response</h2>
       {audioPath ? (
-        <div style={{ width: '100%' }}>
-          <div ref={containerRef} style={{ width: '100%' }} />
+        <div aria-label="Audio waveform visualization">
+          <div
+            ref={containerRef}
+            style={{ width: '100%' }}
+            role="application"
+            aria-label="Audio playback controls"
+          />
         </div>
       ) : (
-        <p>No audio to play</p>
+        <p role="status">No audio available</p>
       )}
     </div>
   );

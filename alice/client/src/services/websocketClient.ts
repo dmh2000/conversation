@@ -10,7 +10,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 export function useWebSocket(onMessage: (message: Message) => void) {
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const reconnectTimeoutRef = useRef<number>();
+  const reconnectTimeoutRef = useRef<number | undefined>(undefined);
   const onMessageRef = useRef(onMessage);
   const connectRef = useRef<() => void>(() => {}); // Create a ref for the connect function
 

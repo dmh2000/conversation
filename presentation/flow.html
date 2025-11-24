@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Comparison: Bob vs Alice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="deco-circle deco-circle-1"></div>
+    <div class="deco-circle deco-circle-2"></div>
+
+    <div class="container">
+        <h1>Architecture Comparison</h1>
+        <p class="subtitle">System Architecture: Bob vs Alice Implementation</p>
+
+        <div class="architecture-grid">
+            <!-- Bob System -->
+            <div class="system bob">
+                <h2 class="system-title">Bob</h2>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">Browser</div>
+                    </div>
+                    <!-- WebSocket connection from Browser to Server -->
+                    <div class="websocket-connection">
+                        <div class="websocket-line"></div>
+                        <div class="websocket-label">WebSocket</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component narrow">
+                        <div class="component-label">Web Server</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">File Server</div>
+                        <div class="connection">
+                            <div class="connection-line"></div>
+                            <div class="connection-label">TCP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">AI</div>
+                    </div>
+                    <!-- AI-to-AI bridge -->
+                    <div class="ai-bridge">
+                        <div class="ai-bridge-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alice System -->
+            <div class="system alice">
+                <h2 class="system-title">Alice</h2>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">Browser</div>
+                    </div>
+                    <!-- WebSocket connection from Browser to Server -->
+                    <div class="websocket-connection">
+                        <div class="websocket-line"></div>
+                        <div class="websocket-label">WebSocket</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component narrow">
+                        <div class="component-label">Web Server</div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">File Server</div>
+                        <div class="connection">
+                            <div class="connection-line"></div>
+                            <div class="connection-label">TCP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="component-wrapper">
+                    <div class="component">
+                        <div class="component-label">AI</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cross-system communication -->
+        <div class="communication">
+            <div class="communication-title">AI Communication Layer</div>
+            <div class="data-flow">
+                <div class="ai-component">AI (Bob)</div>
+
+                <div class="flow-arrows">
+                    <div class="arrow">
+                        <div class="arrow-label">Questions</div>
+                        <div class="arrow-line"></div>
+                    </div>
+                    <div class="arrow">
+                        <div class="arrow-line reverse"></div>
+                        <div class="arrow-label">Answers</div>
+                    </div>
+                </div>
+
+                <div class="ai-component">AI (Alice)</div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot websocket"></div>
+                <span>WebSocket Connection</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot tcp"></div>
+                <span>TCP Connection</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot data"></div>
+                <span>Data Exchange</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

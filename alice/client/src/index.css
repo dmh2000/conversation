@@ -1,11 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* Typography */
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+
+  /* Colors - Synthwave Cyberpunk */
+  --color-space: #0a0a1e;
+  --color-deep-purple: #1a0a2e;
+  --color-neon-cyan: #00fff0;
+  --color-neon-magenta: #ff006e;
+  --color-neon-blue: #4d4dff;
+  --color-neon-pink: #ff1b8d;
+  --color-dark-purple: #16001e;
+  --color-grid: rgba(77, 77, 255, 0.3);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.8);
+
+  /* Typography Scale */
+  --text-xs: clamp(0.75rem, 0.5vw + 0.65rem, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.5vw + 0.75rem, 1rem);
+  --text-base: clamp(1rem, 0.75vw + 0.85rem, 1.125rem);
+  --text-lg: clamp(1.25rem, 1vw + 1rem, 1.5rem);
+  --text-xl: clamp(1.75rem, 2vw + 1.25rem, 2.5rem);
+  --text-2xl: clamp(2.5rem, 3vw + 1.75rem, 4rem);
+  --text-3xl: clamp(3.5rem, 5vw + 2.5rem, 6rem);
+
+  /* Spacing Scale */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+
+  /* Animation */
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 600ms;
+  --easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Effects */
+  --glow-cyan: 0 0 20px rgba(0, 255, 240, 0.5), 0 0 40px rgba(0, 255, 240, 0.3);
+  --glow-magenta: 0 0 20px rgba(255, 0, 110, 0.5), 0 0 40px rgba(255, 0, 110, 0.3);
+  --glow-blue: 0 0 20px rgba(77, 77, 255, 0.5), 0 0 40px rgba(77, 77, 255, 0.3);
+
+  font-family: var(--font-body);
+  line-height: 1.6;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+  color: var(--color-text-primary);
+  background-color: var(--color-space);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,64 +60,140 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  padding: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  background: linear-gradient(135deg, var(--color-space) 0%, var(--color-deep-purple) 50%, var(--color-dark-purple) 100%);
+}
+
+/* Animated Cyberpunk Grid Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(77, 77, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77, 77, 255, 0.15) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 0 0;
+  transform: perspective(500px) rotateX(60deg) translateZ(-100px);
+  transform-origin: center top;
+  pointer-events: none;
+  animation: gridScroll 20s linear infinite;
+  z-index: 0;
+}
+
+@keyframes gridScroll {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 50px, 50px 0;
+  }
+}
+
+/* Animated gradient overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(77, 77, 255, 0.15), transparent 50%),
+              radial-gradient(ellipse at 80% 50%, rgba(255, 0, 110, 0.1), transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(0, 255, 240, 0.1), transparent 50%);
+  pointer-events: none;
+  animation: gradientShift 15s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 #root {
+  position: relative;
   width: 100%;
-  height: 100%;
-  display: flex; /* Make #root a flex container */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  min-height: 100vh;
+  z-index: 2;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-family: var(--font-display);
+  font-weight: 900;
   line-height: 1.1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 2px solid var(--color-neon-cyan);
+  background: transparent;
+  color: var(--color-neon-cyan);
+  padding: 1rem 2.5rem;
+  font-size: var(--text-base);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all var(--duration-base) var(--easing);
+  position: relative;
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--color-neon-cyan);
+  transition: left var(--duration-base) var(--easing);
+  z-index: -1;
+}
+
+button:hover::before {
+  left: 0;
+}
+
+button:hover {
+  color: var(--color-space);
+  text-shadow: none;
+  box-shadow: var(--glow-cyan);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--color-neon-cyan);
+  outline-offset: 4px;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
