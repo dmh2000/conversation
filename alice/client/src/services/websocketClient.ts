@@ -5,7 +5,7 @@ export interface Message {
   audio: string;
 }
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
 
 export function useWebSocket(onMessage: (message: Message) => void) {
   const wsRef = useRef<WebSocket | null>(null);

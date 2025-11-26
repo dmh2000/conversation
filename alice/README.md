@@ -1,171 +1,252 @@
-# WebSocket Messaging App
+# Alice Client
 
-A real-time messaging application that receives JSON messages via TCP, forwards them through a WebSocket server, and displays them in a React web app with text display and audio playback.
+Alice is a React-based web application that displays answers from the Alice AI persona. It connects to the AI Server via WebSocket and provides a clean interface for viewing text responses and playing audio.
 
 ## Architecture
 
 ```
-TCP Client → TCP Listener (Port 8080) → WebSocket Server → React Web App
-                                              ↓
-                                         Broadcast to clients
-                                              ↓
-                                    Display Text + Play Audio
+Alice Client → WebSocket (Port 3001) → AI Server → Alice AI Persona
+                                             ↓
+                                        Receives questions
+                                        Generates answers
 ```
 
-## Message Format
+## Features
 
-```json
-{
-  "text": "string",  // Text to be displayed on the web page
-  "audio": "string"  // Path to MP3 audio file (e.g., "/test.mp3")
-}
-```
+- ✅ Real-time WebSocket communication with AI Server
+- ✅ Audio playback with WaveSurfer visualization
+- ✅ Connection status indicator
+- ✅ Automatic reconnection on disconnect
+- ✅ Start screen with connection button
+- ✅ Modern, clean UI
+- ✅ TypeScript for type safety
+- ✅ Responsive design
 
 ## Project Structure
 
 ```
-claude/
-├── server/              # Node.js backend server
-│   ├── src/
-│   │   ├── index.ts           # Main server entry point
-│   │   ├── tcpListener.ts     # TCP server for external messages
-│   │   ├── websocketServer.ts # WebSocket server
-│   │   └── types.ts           # Shared TypeScript types
-│   ├── public/                # Static MP3 files
-│   ├── test-tcp-client.js     # Test script to send messages
-│   └── package.json
-└── client/              # React + TypeScript frontend
-    ├── src/
-    │   ├── App.tsx                    # Main App component
-    │   ├── components/
-    │   │   ├── MessageDisplay.tsx     # Text display component
-    │   │   └── AudioPlayer.tsx        # Audio playback component
-    │   └── services/
-    │       └── websocketClient.ts     # WebSocket connection handler
-    └── package.json
+alice/client/
+├── src/
+│   ├── App.tsx                    # Main application component
+│   ├── components/
+│   │   ├── MessageDisplay.tsx     # Text message display
+│   │   └── AudioPlayer.tsx        # Audio player with visualization
+│   ├── services/
+│   │   └── websocketClient.ts     # WebSocket connection handler
+│   ├── App.css                    # Styling
+│   └── main.tsx                   # Application entry point
+├── public/                        # Static assets
+├── index.html
+├── package.json
+└── vite.config.ts
 ```
 
 ## Setup and Installation
 
-### Server
+### Prerequisites
+
+- Node.js 18+ and npm
+- AI Server running on port 3001
+
+### Install Dependencies
 
 ```bash
-cd server
-npm install
-```
-
-### Client
-
-```bash
-cd client
+cd alice/client
 npm install
 ```
 
 ## Running the Application
 
-### Start the Server
+### Development Mode
 
 ```bash
-cd server
 npm run dev
 ```
 
-The server will start on:
-- HTTP/WebSocket: `http://localhost:3000`
-- TCP Listener: `localhost:8080`
+The application will start on `http://localhost:5173`
 
-### Start the Client
-
-In a new terminal:
+### Build for Production
 
 ```bash
-cd client
-npm run dev
-```
-
-The client will start on `http://localhost:5173`
-
-## Testing
-
-### Add MP3 Files
-
-Place your MP3 audio files in the `server/public/` directory.
-
-### Send Test Messages
-
-Use the included test script to send messages via TCP:
-
-```bash
-cd server
-node test-tcp-client.js "Hello World!" "/test.mp3"
-```
-
-Or without arguments to send a default test message:
-
-```bash
-node test-tcp-client.js
-```
-
-### Manual Testing with Netcat
-
-You can also use netcat to send JSON messages:
-
-```bash
-echo '{"text":"Test message","audio":"/test.mp3"}' | nc localhost 8080
-```
-
-## How It Works
-
-1. **TCP Client** sends a JSON message to the TCP listener on port 8080
-2. **TCP Listener** parses the message using brace delimiters `{}`
-3. **WebSocket Server** receives the parsed message and broadcasts it to all connected web clients
-4. **React Web App**:
-   - Receives the message via WebSocket
-   - Displays the text in the MessageDisplay component
-   - Loads and plays the MP3 file specified in the audio field
-
-## Environment Variables
-
-### Server
-
-- `PORT`: HTTP server port (default: 3000)
-- `TCP_PORT`: TCP listener port (default: 8080)
-
-### Client
-
-- `VITE_WS_URL`: WebSocket server URL (default: ws://localhost:3000)
-
-## Building for Production
-
-### Server
-
-```bash
-cd server
-npm run build
-npm start
-```
-
-### Client
-
-```bash
-cd client
 npm run build
 ```
 
-The built files will be in `client/dist/` and can be served by any static file server.
+The built files will be in the `dist/` directory.
 
-## Features
+### Preview Production Build
 
-- ✅ Real-time WebSocket communication
-- ✅ TCP message reception with brace-delimited JSON parsing
-- ✅ Automatic audio playback
-- ✅ Connection status indicator
-- ✅ Automatic reconnection on disconnect
-- ✅ TypeScript for type safety
-- ✅ Clean, modern UI with React
+```bash
+npm run preview
+```
+
+## Configuration
+
+### WebSocket URL
+
+The WebSocket connection URL can be configured via environment variable:
+
+```bash
+VITE_WS_URL=ws://localhost:3001 npm run dev
+```
+
+Default: `ws://localhost:3001`
+
+Configuration is in `src/services/websocketClient.ts`:
+
+```typescript
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+```
+
+## Usage
+
+1. **Start the AI Server**:
+   ```bash
+   cd ../../ai-server
+   ./ai-server
+   ```
+
+2. **Start Alice Client**:
+   ```bash
+   npm run dev
+   ```
+
+3. **Open in Browser**:
+   Navigate to `http://localhost:5173`
+
+4. **Connect**:
+   Click the "Start" button to establish WebSocket connection
+
+5. **Receive Messages**:
+   Alice will display questions and answers from the conversation
+
+## Message Format
+
+The client expects JSON messages from the AI Server:
+
+```json
+{
+  "text": "Answer text to display",
+  "audio": "/audio/response.mp3"
+}
+```
+
+- `text`: The text content to display
+- `audio`: URL path to audio file (server URL is auto-prepended)
+
+## Components
+
+### App.tsx
+
+Main application component that handles:
+- Connection state management
+- Message reception
+- Start screen display
+- Status indicator
+
+### MessageDisplay.tsx
+
+Displays received text messages with:
+- Clean typography
+- Fade-in animations
+- Accessible markup
+
+### AudioPlayer.tsx
+
+Audio playback component featuring:
+- WaveSurfer.js visualization
+- Auto-play functionality
+- Loading states
+- Error handling
+
+### websocketClient.ts
+
+Custom hook for WebSocket management:
+- Automatic connection
+- Auto-reconnection on disconnect
+- Message parsing
+- Connection state tracking
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+### Code Quality
+
+- TypeScript for type safety
+- ESLint for code quality
+- React 19 best practices
+- Modern hooks-based architecture
 
 ## Technologies Used
 
-- **Backend**: Node.js, Express, WebSocket (ws), TypeScript
-- **Frontend**: React, TypeScript, Vite
-- **Communication**: WebSocket, TCP/IP
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **WaveSurfer.js** - Audio visualization
+- **WebSocket API** - Real-time communication
+
+## Styling
+
+The application uses modern CSS with:
+- CSS Grid and Flexbox layouts
+- CSS custom properties (variables)
+- Smooth animations and transitions
+- Responsive design
+- Accessible color contrast
+
+## Accessibility
+
+- ARIA labels and roles
+- Live regions for dynamic content
+- Keyboard navigation support
+- Screen reader friendly
+- Semantic HTML
+
+## Troubleshooting
+
+### Cannot Connect to WebSocket
+
+- Ensure AI Server is running: `cd ../../ai-server && ./ai-server`
+- Check that port 3001 is not blocked by firewall
+- Verify WebSocket URL in browser console
+
+### Audio Not Playing
+
+- Check that audio paths are valid
+- Verify server is serving audio files correctly
+- Check browser console for errors
+- Ensure browser allows auto-play
+
+### Blank Screen
+
+- Check browser console for errors
+- Verify all dependencies are installed: `npm install`
+- Try clearing the Vite cache: `rm -rf node_modules/.vite`
+
+## Integration with AI Server
+
+Alice client integrates with the AI Server architecture:
+
+1. Connects to AliceServer WebSocket (port 3001)
+2. Receives messages from Alice AI persona
+3. Displays text and plays audio
+4. Maintains connection with auto-reconnect
+
+The Alice AI persona on the server:
+- Receives questions from Bob AI
+- Generates intelligent answers (future LLM integration)
+- Sends responses to Alice client with audio
+
+## Future Enhancements
+
+- Voice input for sending messages to Alice AI
+- Conversation history display
+- Theme customization
+- Multi-language support
+- Enhanced audio controls (pause, seek, volume)
+- Message search and filtering

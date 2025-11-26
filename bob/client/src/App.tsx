@@ -25,7 +25,7 @@ function App() {
   const isNearLimit = wordCount >= 230; // Highlight when near 256 word limit
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3000');
+    const ws = new WebSocket('ws://localhost:3002');
     wsRef.current = ws;
 
     ws.onopen = () => {

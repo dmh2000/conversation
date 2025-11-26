@@ -57,3 +57,33 @@ For now, this will be scaffolding out the process structure and will be built up
   - name the component files properly
 
 
+
+
+--------------------------------------------------------------------------------------------------
+  You can now test the implementation by:
+
+  1. Open Alice client at http://localhost:5173/
+  2. Open Bob client at http://localhost:5174/
+  3. Click "Go Ask Alice" in the Bob client to send a message
+  4. Both clients should connect to the AI server and exchange messages
+
+  The AI server will log all connections and message exchanges. Check the server
+  output to see the communication flow.
+
+  📝 Current Behavior
+
+  - Bob client sends a message → BobAI responds with "Hello from Bob AI. Processing
+  your input: [message]"
+  - BobAI forwards question to AliceAI
+  - AliceAI responds with "Hello from Alice AI. You said: [question]"
+  - Response is displayed in Alice client
+
+  🔮 Next Steps (Future Enhancements)
+
+  The scaffolding is complete. Future work includes:
+  - LLM integration (replace dummy responses with actual AI)
+  - Audio generation (text-to-speech)
+  - Conversation context management
+  - Static file serving for audio files
+
+  All background processes are running and ready for testing!
