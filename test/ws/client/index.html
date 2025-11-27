@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Test Client</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #00ff00;
+    }
+    h1 { color: #00ff00; }
+    #status {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #00ff00;
+    }
+    #log {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      background: #0a0a0a;
+    }
+    .sent { color: #00ffff; }
+    .received { color: #ffff00; }
+    .system { color: #ff00ff; }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Test Client</h1>
+  <div id="status">Status: Disconnected</div>
+  <div id="log"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

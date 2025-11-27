@@ -7,3 +7,6 @@
           "env": {}
         }
       },
+
+
+    lsof -ti:3001,3002 | xargs kill -9 2>/dev/null;
