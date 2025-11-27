@@ -3,10 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
+	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
 	"github.com/gorilla/websocket"
 )
@@ -39,7 +39,7 @@ func (s *BobServer) Start(ctx context.Context) error {
 	mux.HandleFunc("/", s.handleWebSocket)
 
 	addr := fmt.Sprintf("localhost:%d", s.port)
-	log.Printf("Bob server listening on %s", addr)
+	logger.Printf("Bob server listening on %s", addr)
 
 	server := &http.Server{
 		Addr:    addr,
@@ -49,7 +49,7 @@ func (s *BobServer) Start(ctx context.Context) error {
 	// Handle graceful shutdown
 	go func() {
 		<-ctx.Done()
-		log.Println("Shutting down Bob server...")
+		logger.Println("Shutting down Bob server...")
 		server.Close()
 	}()
 
@@ -58,36 +58,40 @@ func (s *BobServer) Start(ctx context.Context) error {
 
 // handleWebSocket handles incoming WebSocket connections
 func (s *BobServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	// Check if we already have a connection
-	s.connMutex.Lock()
-	if s.currentConn != nil {
-		s.connMutex.Unlock()
-		http.Error(w, "Connection already exists", http.StatusServiceUnavailable)
-		return
-	}
-	s.connMutex.Unlock()
-
 	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to upgrade connection: %v", err)
+		logger.Printf("Failed to upgrade connection: %v", err)
 		return
 	}
 
-	// Set current connection
+	// Check if we already have a connection and replace it if so
 	s.connMutex.Lock()
+	var oldConn *websocket.Conn
+	if s.currentConn != nil {
+		oldConn = s.currentConn
+		logger.Println("Replacing existing connection")
+	}
 	s.currentConn = conn
 	s.connMutex.Unlock()
 
-	log.Println("Bob client connected")
+	// Close the old connection if it existed
+	if oldConn != nil {
+		oldConn.Close()
+	}
+
+	logger.Println("Bob client connected")
 
 	// Handle connection closure
 	defer func() {
 		s.connMutex.Lock()
-		s.currentConn = nil
+		// Only clear currentConn if it's still us (hasn't been replaced)
+		if s.currentConn == conn {
+			s.currentConn = nil
+		}
 		s.connMutex.Unlock()
 		conn.Close()
-		log.Println("Bob client disconnected")
+		logger.Println("Bob client disconnected")
 	}()
 
 	// Read messages from client
@@ -96,18 +100,18 @@ func (s *BobServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket error: %v", err)
+				logger.Printf("WebSocket error: %v", err)
 			}
 			break
 		}
 
 		// Forward text to AI if present
 		if msg.Text != "" {
-			log.Printf("Bob client sent: %s", msg.Text)
+			logger.Printf("Bob client sent: %s", msg.Text)
 			select {
 			case s.toAI <- msg.Text:
 			default:
-				log.Println("AI channel full, dropping message")
+				logger.Println("AI channel full, dropping message")
 			}
 		}
 	}
@@ -125,12 +129,12 @@ func (s *BobServer) broadcastFromAI(ctx context.Context) {
 			s.connMutex.Unlock()
 
 			if conn != nil {
-				log.Printf("Broadcasting to Bob client: %s", msg.Text)
+				logger.Printf("Broadcasting to Bob client: %s", msg.Text)
 				if err := conn.WriteJSON(msg); err != nil {
-					log.Printf("Failed to send message to Bob client: %v", err)
+					logger.Printf("Failed to send message to Bob client: %v", err)
 				}
 			} else {
-				log.Println("No Bob client connected, message dropped")
+				logger.Println("No Bob client connected, message dropped")
 			}
 		}
 	}

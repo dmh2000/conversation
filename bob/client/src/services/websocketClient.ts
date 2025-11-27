@@ -5,7 +5,7 @@ export interface Message {
   audio: string;
 }
 
-const WS_URL = 'ws://localhost:3001';
+const WS_URL = 'ws://localhost:3002';
 
 export function useWebSocket(onMessage: (message: Message) => void) {
   const wsRef = useRef<WebSocket | null>(null);

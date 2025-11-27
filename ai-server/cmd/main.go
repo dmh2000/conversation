@@ -2,23 +2,23 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/dmh2000/ai-server/config"
 	"github.com/dmh2000/ai-server/internal/ai"
+	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/server"
 	"github.com/dmh2000/ai-server/internal/types"
 )
 
 func main() {
-	log.Println("Starting AI Server...")
+	logger.Println("Starting AI Server...")
 
 	// Load configuration
 	cfg := config.Load()
-	log.Printf("Configuration: Alice port=%d, Bob port=%d", cfg.AlicePort, cfg.BobPort)
+	logger.Printf("Configuration: Alice port=%d, Bob port=%d", cfg.AlicePort, cfg.BobPort)
 
 	// Create context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -54,27 +54,27 @@ func main() {
 	// Start servers in goroutines
 	go func() {
 		if err := aliceServer.Start(ctx); err != nil {
-			log.Printf("Alice server error: %v", err)
+			logger.Printf("Alice server error: %v", err)
 		}
 	}()
 
 	go func() {
 		if err := bobServer.Start(ctx); err != nil {
-			log.Printf("Bob server error: %v", err)
+			logger.Printf("Bob server error: %v", err)
 		}
 	}()
 
-	log.Println("AI Server is running. Press Ctrl+C to stop.")
+	logger.Println("AI Server is running. Press Ctrl+C to stop.")
 
 	// Wait for interrupt signal
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	<-sigChan
 
-	log.Println("Shutting down AI Server...")
+	logger.Println("Shutting down AI Server...")
 	cancel()
 
 	// Give goroutines time to clean up
 	// In a production app, you'd use a WaitGroup here
-	log.Println("AI Server stopped")
+	logger.Println("AI Server stopped")
 }

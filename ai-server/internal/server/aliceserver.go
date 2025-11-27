@@ -3,10 +3,10 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
+	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
 	"github.com/gorilla/websocket"
 )
@@ -42,17 +42,21 @@ func (s *AliceServer) Start(ctx context.Context) error {
 	go s.broadcastFromAI(ctx)
 
 	// Set up HTTP server for WebSocket
-	http.HandleFunc("/", s.handleWebSocket)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", s.handleWebSocket)
 
 	addr := fmt.Sprintf("localhost:%d", s.port)
-	log.Printf("Alice server listening on %s", addr)
+	logger.Printf("Alice server listening on %s", addr)
 
-	server := &http.Server{Addr: addr}
+	server := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
 
 	// Handle graceful shutdown
 	go func() {
 		<-ctx.Done()
-		log.Println("Shutting down Alice server...")
+		logger.Println("Shutting down Alice server...")
 		server.Close()
 	}()
 
@@ -61,36 +65,40 @@ func (s *AliceServer) Start(ctx context.Context) error {
 
 // handleWebSocket handles incoming WebSocket connections
 func (s *AliceServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	// Check if we already have a connection
-	s.connMutex.Lock()
-	if s.currentConn != nil {
-		s.connMutex.Unlock()
-		http.Error(w, "Connection already exists", http.StatusServiceUnavailable)
-		return
-	}
-	s.connMutex.Unlock()
-
 	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to upgrade connection: %v", err)
+		logger.Printf("Failed to upgrade connection: %v", err)
 		return
 	}
 
-	// Set current connection
+	// Check if we already have a connection and replace it if so
 	s.connMutex.Lock()
+	var oldConn *websocket.Conn
+	if s.currentConn != nil {
+		oldConn = s.currentConn
+		logger.Println("Replacing existing connection")
+	}
 	s.currentConn = conn
 	s.connMutex.Unlock()
 
-	log.Println("Alice client connected")
+	// Close the old connection if it existed
+	if oldConn != nil {
+		oldConn.Close()
+	}
+
+	logger.Println("Alice client connected")
 
 	// Handle connection closure
 	defer func() {
 		s.connMutex.Lock()
-		s.currentConn = nil
+		// Only clear currentConn if it's still us (hasn't been replaced)
+		if s.currentConn == conn {
+			s.currentConn = nil
+		}
 		s.connMutex.Unlock()
 		conn.Close()
-		log.Println("Alice client disconnected")
+		logger.Println("Alice client disconnected")
 	}()
 
 	// Read messages from client (Alice mostly receives, but may send)
@@ -99,18 +107,18 @@ func (s *AliceServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket error: %v", err)
+				logger.Printf("WebSocket error: %v", err)
 			}
 			break
 		}
 
 		// Forward text to AI if present
 		if msg.Text != "" {
-			log.Printf("Alice client sent: %s", msg.Text)
+			logger.Printf("Alice client sent: %s", msg.Text)
 			select {
 			case s.toAI <- msg.Text:
 			default:
-				log.Println("AI channel full, dropping message")
+				logger.Println("AI channel full, dropping message")
 			}
 		}
 	}
@@ -128,12 +136,12 @@ func (s *AliceServer) broadcastFromAI(ctx context.Context) {
 			s.connMutex.Unlock()
 
 			if conn != nil {
-				log.Printf("Broadcasting to Alice client: %s", msg.Text)
+				logger.Printf("Broadcasting to Alice client: %s", msg.Text)
 				if err := conn.WriteJSON(msg); err != nil {
-					log.Printf("Failed to send message to Alice client: %v", err)
+					logger.Printf("Failed to send message to Alice client: %v", err)
 				}
 			} else {
-				log.Println("No Alice client connected, message dropped")
+				logger.Println("No Alice client connected, message dropped")
 			}
 		}
 	}

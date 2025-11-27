@@ -1,20 +1,23 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import './App.css';
 import { AudioPlayer } from './components/AudioPlayer';
-
-interface Message {
-  text: string;
-  audio: string;
-}
+import { useWebSocket } from './services/websocketClient';
+import type { Message } from './services/websocketClient';
 
 function App() {
   const [message, setMessage] = useState<string>('');
   const [isStarted, setIsStarted] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
   const [inputText, setInputText] = useState('');
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleMessage = useCallback((receivedMessage: Message) => {
+    console.log('Received message:', receivedMessage);
+    setMessage(receivedMessage.text);
+    setCurrentAudio(receivedMessage.audio || null);
+  }, []);
+
+  const { isConnected, send } = useWebSocket(handleMessage);
 
   // Calculate word count
   const wordCount = useMemo(() => {
@@ -23,42 +26,6 @@ function App() {
   }, [inputText]);
 
   const isNearLimit = wordCount >= 230; // Highlight when near 256 word limit
-
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3002');
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      console.log('Connected to WebSocket server');
-      setIsConnected(true);
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const receivedMessage: Message = JSON.parse(event.data);
-        setMessage(receivedMessage.text);
-        setCurrentAudio(receivedMessage.audio || null);
-      } catch (error) {
-        console.error('Failed to parse message:', error);
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('Disconnected from WebSocket server');
-      setIsConnected(false);
-      setMessage('Connection lost. Please refresh.');
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setIsConnected(false);
-      setMessage('Connection error.');
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -75,9 +42,7 @@ function App() {
   };
 
   const handleGoAskAlice = () => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ text: inputText }));
-    }
+    send({ text: inputText });
     setIsStarted(true);
   };
 

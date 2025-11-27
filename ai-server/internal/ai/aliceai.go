@@ -2,8 +2,8 @@ package ai
 
 import (
 	"context"
-	"log"
 
+	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
 )
 
@@ -32,22 +32,22 @@ func NewAliceAI(
 
 // Start begins processing messages
 func (a *AliceAI) Start(ctx context.Context) {
-	log.Println("Alice AI started")
+	logger.Println("Alice AI started")
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Alice AI shutting down")
+			logger.Println("Alice AI shutting down")
 			return
 
 		case msg := <-a.fromServer:
 			// Handle messages from Alice server (if any)
-			log.Printf("Alice AI received from server: %s", msg)
+			logger.Printf("Alice AI received from server: %s", msg)
 			a.processMessage(msg)
 
 		case msg := <-a.fromBob:
 			// Handle questions from Bob AI
-			log.Printf("Alice AI received question from Bob: %s", msg)
+			logger.Printf("Alice AI received question from Bob: %s", msg)
 			a.processMessage(msg)
 		}
 	}
@@ -58,25 +58,25 @@ func (a *AliceAI) processMessage(input string) {
 	// For now, return a dummy response
 	// Later: integrate with LLM to generate intelligent answers
 	response := types.ConversationMessage{
-		Text:  "Hello from Alice AI. You said: " + input,
+		Text:  input,
 		Audio: "", // Will add audio generation later
 	}
 
-	log.Printf("Alice AI responding: %s", response.Text)
+	logger.Printf("Alice AI responding: %s", response.Text)
 
 	// Send to Alice server for display
 	select {
 	case a.toServer <- response:
-		log.Println("Alice AI sent response to server")
+		logger.Println("Alice AI sent response to server")
 	default:
-		log.Println("Alice server channel full, dropping message")
+		logger.Println("Alice server channel full, dropping message")
 	}
 
 	// Send text to Bob AI for context
 	select {
 	case a.toBob <- response.Text:
-		log.Println("Alice AI sent response to Bob AI")
+		logger.Println("Alice AI sent response to Bob AI")
 	default:
-		log.Println("Bob AI channel full, dropping message")
+		logger.Println("Bob AI channel full, dropping message")
 	}
 }

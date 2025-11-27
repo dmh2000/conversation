@@ -2,8 +2,8 @@ package ai
 
 import (
 	"context"
-	"log"
 
+	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
 )
 
@@ -32,22 +32,22 @@ func NewBobAI(
 
 // Start begins processing messages
 func (b *BobAI) Start(ctx context.Context) {
-	log.Println("Bob AI started")
+	logger.Println("Bob AI started")
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Bob AI shutting down")
+			logger.Println("Bob AI shutting down")
 			return
 
 		case msg := <-b.fromServer:
 			// Handle initial question/input from Bob client
-			log.Printf("Bob AI received from server: %s", msg)
+			logger.Printf("Bob AI received from server: %s", msg)
 			b.processInitialMessage(msg)
 
 		case msg := <-b.fromAlice:
 			// Handle answer from Alice AI
-			log.Printf("Bob AI received answer from Alice: %s", msg)
+			logger.Printf("Bob AI received answer from Alice: %s", msg)
 			b.processAliceResponse(msg)
 		}
 	}
@@ -64,24 +64,24 @@ func (b *BobAI) processInitialMessage(input string) {
 		Audio: "", // Will add audio generation later
 	}
 
-	log.Printf("Bob AI acknowledging: %s", acknowledgment.Text)
+	logger.Printf("Bob AI acknowledging: %s", acknowledgment.Text)
 
 	select {
 	case b.toServer <- acknowledgment:
-		log.Println("Bob AI sent acknowledgment to server")
+		logger.Println("Bob AI sent acknowledgment to server")
 	default:
-		log.Println("Bob server channel full, dropping acknowledgment")
+		logger.Println("Bob server channel full, dropping acknowledgment")
 	}
 
 	// Generate a question for Alice
-	question := "Alice, can you tell me about: " + input + "?"
-	log.Printf("Bob AI asking Alice: %s", question)
+	question := input
+	logger.Printf("Bob AI asking Alice: %s", question)
 
 	select {
 	case b.toAlice <- question:
-		log.Println("Bob AI sent question to Alice")
+		logger.Println("Bob AI sent question to Alice")
 	default:
-		log.Println("Alice AI channel full, dropping question")
+		logger.Println("Alice AI channel full, dropping question")
 	}
 }
 
@@ -91,17 +91,17 @@ func (b *BobAI) processAliceResponse(answer string) {
 	// Later: generate intelligent follow-up questions based on Alice's answer
 
 	response := types.ConversationMessage{
-		Text:  "Bob AI received from Alice: " + answer,
+		Text:  answer,
 		Audio: "", // Will add audio generation later
 	}
 
-	log.Printf("Bob AI processing Alice's response: %s", response.Text)
+	logger.Printf("Bob AI processing Alice's response: %s", response.Text)
 
 	select {
 	case b.toServer <- response:
-		log.Println("Bob AI sent Alice's response to server")
+		logger.Println("Bob AI sent Alice's response to server")
 	default:
-		log.Println("Bob server channel full, dropping response")
+		logger.Println("Bob server channel full, dropping response")
 	}
 
 	// TODO: Later, generate follow-up question based on answer
