@@ -30,3 +30,5 @@ Thumbs.db
 *.tmp
 *.bak
 
+alice/client/public/audio/*.mp3
+bob/client/public/audio/*.mp3

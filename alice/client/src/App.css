@@ -7,59 +7,6 @@
 }
 
 /* ===========================
-   START SCREEN - Cyberpunk Entrance
-   =========================== */
-.start-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: var(--space-lg);
-  position: relative;
-  animation: fadeIn var(--duration-slow) var(--easing);
-}
-
-.start-screen h1 {
-  font-size: var(--text-3xl);
-  color: var(--color-neon-cyan);
-  text-shadow: var(--glow-cyan);
-  margin: 0 0 var(--space-xl) 0;
-  animation: glitchTitle 3s ease-in-out infinite;
-  position: relative;
-}
-
-/* Glitch effect on title */
-@keyframes glitchTitle {
-  0%, 90%, 100% {
-    text-shadow: var(--glow-cyan);
-  }
-  92% {
-    text-shadow:
-      -2px 0 var(--color-neon-magenta),
-      2px 0 var(--color-neon-cyan),
-      0 0 40px var(--color-neon-cyan);
-  }
-  94% {
-    text-shadow: var(--glow-cyan);
-  }
-}
-
-.start-screen button {
-  animation: buttonPulse 2s ease-in-out infinite;
-}
-
-@keyframes buttonPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 255, 240, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(0, 255, 240, 0);
-  }
-}
-
-/* ===========================
    HEADER - Minimalist Status
    =========================== */
 header {
@@ -168,7 +115,7 @@ main {
 
 .message-display p {
   font-family: var(--font-body);
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: 600;
   line-height: 1.4;
   color: var(--color-text-primary);

@@ -2,31 +2,46 @@ package ai
 
 import (
 	"context"
+	_ "embed"
+	"fmt"
+	"strings"
 
 	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
+	llmclient "github.com/dmh2000/go-llmclient"
 )
+
+const llm_model = "gemini-2.5-pro"
+
+// Alice System Prompt
+//
+//go:embed alice-system.md
+var systemPrompt string
 
 // AliceAI simulates Alice persona that answers questions
 type AliceAI struct {
-	fromServer <-chan string
-	toServer   chan<- types.ConversationMessage
-	fromBob    <-chan string
-	toBob      chan<- string
+	fromAliceUI <-chan string
+	toAliceUI   chan<- types.ConversationMessage
+	fromBob     <-chan types.ConversationMessage
+	toBob       chan<- types.ConversationMessage
+	context     []string
+	client      llmclient.Client
 }
 
 // NewAliceAI creates a new Alice AI component
 func NewAliceAI(
 	fromServer <-chan string,
 	toServer chan<- types.ConversationMessage,
-	fromBob <-chan string,
-	toBob chan<- string,
+	fromBob <-chan types.ConversationMessage,
+	toBob chan<- types.ConversationMessage,
 ) *AliceAI {
 	return &AliceAI{
-		fromServer: fromServer,
-		toServer:   toServer,
-		fromBob:    fromBob,
-		toBob:      toBob,
+		fromAliceUI: fromServer,
+		toAliceUI:   toServer,
+		fromBob:     fromBob,
+		toBob:       toBob,
+		context:     []string{},
+		client:      nil,
 	}
 }
 
@@ -40,43 +55,125 @@ func (a *AliceAI) Start(ctx context.Context) {
 			logger.Println("Alice AI shutting down")
 			return
 
-		case msg := <-a.fromServer:
-			// Handle messages from Alice server (if any)
+		case msg := <-a.fromAliceUI:
+			// Handle messages from Alice server (should not happen
 			logger.Printf("Alice AI received from server: %s", msg)
-			a.processMessage(msg)
 
-		case msg := <-a.fromBob:
+		case question := <-a.fromBob:
 			// Handle questions from Bob AI
-			logger.Printf("Alice AI received question from Bob: %s", msg)
-			a.processMessage(msg)
+			logger.Printf("Alice AI received question from Bob")
+			a.processQuestion(question)
 		}
 	}
 }
 
 // processMessage generates a response and sends it to both server and Bob
-func (a *AliceAI) processMessage(input string) {
-	// For now, return a dummy response
-	// Later: integrate with LLM to generate intelligent answers
-	response := types.ConversationMessage{
-		Text:  input,
-		Audio: "", // Will add audio generation later
+func (a *AliceAI) processQuestion(msg types.ConversationMessage) error {
+
+	response, err := a.createResponseMessage(msg)
+	if err != nil {
+		logger.Printf("Error creating response: %v", err)
+		return err
 	}
 
-	logger.Printf("Alice AI responding: %s", response.Text)
+	logger.Printf("Alice AI responding")
+
+	// ===============================
+	// create UI response
+	// ===============================
+	// create the mp3
+	text := strings.TrimPrefix(response.Text, "<alice>")
+	text = strings.TrimSuffix(text, "</alice>")
+
+	responseToAliceUI := types.ConversationMessage{
+		Text:  text,
+		Audio: "",
+	}
 
 	// Send to Alice server for display
 	select {
-	case a.toServer <- response:
+	case a.toAliceUI <- responseToAliceUI:
 		logger.Println("Alice AI sent response to server")
+
 	default:
 		logger.Println("Alice server channel full, dropping message")
 	}
 
 	// Send text to Bob AI for context
 	select {
-	case a.toBob <- response.Text:
+	case a.toBob <- response:
 		logger.Println("Alice AI sent response to Bob AI")
+
 	default:
 		logger.Println("Bob AI channel full, dropping message")
 	}
+
+	return nil
+}
+
+func validateResonse(response string) error {
+	if strings.Contains(response, "<bob>") {
+		return fmt.Errorf("question has bob")
+	}
+	return nil
+}
+
+func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.ConversationMessage, error) {
+
+	if a.client == nil {
+		// create llm client
+		client, err := llmclient.NewClient("gemini")
+		if err != nil {
+			fmt.Println(err)
+			return msg, err
+		}
+		a.client = client
+	}
+
+	// Step 1: add bobs question to context
+	bob_says := msg.Text
+	a.context = append(a.context, bob_says)
+
+	// issue query to alice
+	alice_says, err := a.client.QueryText(context.Background(), systemPrompt, a.context, llm_model, llmclient.Options{})
+	if err != nil {
+		fmt.Println(err)
+		return msg, err
+	}
+
+	err = validateResonse(alice_says)
+	if err != nil {
+		return msg, err
+	}
+
+	// add alice to context
+	a.context = append(a.context, alice_says)
+
+	// create AI response
+	aiMsg := types.ConversationMessage{
+		Text:  alice_says,
+		Audio: "",
+	}
+
+	// create UI response
+	text := strings.TrimPrefix(alice_says, "<alice>")
+	text = strings.TrimSuffix(text, "</alice>")
+
+	// create the mp3
+	uiMsg := types.ConversationMessage{
+		Text:  text,
+		Audio: "",
+	}
+	// uiMsg = tts.CreateMp3(context.Background(), uiMsg, "../../alice/client/public/audio", "/audio")
+
+	// send it display
+	select {
+	case a.toAliceUI <- uiMsg:
+		logger.Println("Bob AI sent acknowledgment to server")
+	default:
+		logger.Println("Bob server channel full, dropping acknowledgment")
+	}
+
+	return aiMsg, err
+
 }

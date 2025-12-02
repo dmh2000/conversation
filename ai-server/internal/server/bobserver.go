@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/dmh2000/ai-server/internal/logger"
-	"github.com/dmh2000/ai-server/internal/tts"
 	"github.com/dmh2000/ai-server/internal/types"
 	"github.com/gorilla/websocket"
 )
@@ -110,30 +108,14 @@ func (s *BobServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		// Forward text to AI if present
 		if msg.Text != "" {
-			// Generate Audio from text
-			timestamp := time.Now().UnixNano()
-			baseFilename := fmt.Sprintf("audio_%d", timestamp)
-			// Target directory: ../bob/client/public (assuming CWD is ai-server project root)
-			outputPath := fmt.Sprintf("../../bob/client/public/%s", baseFilename)
+			// msg := tts.CreateMp3(r.Context(), msg, "../../bob/client/public/audio", "/audio")
 
-			// Generate the audio file (Puck voice)
-			voice := "Puck"
-			// Note: Speak appends .mp3 to the filename
-			generatedFile, err := tts.Speak(r.Context(), voice, msg.Text, outputPath)
-			if err != nil {
-				logger.Printf("Failed to generate speech: %v", err)
-			} else {
-				logger.Printf("Generated audio: %s", generatedFile)
-				// Set the Audio field to the filename (relative to public root for the client)
-				msg.Audio = fmt.Sprintf("/%s.mp3", baseFilename)
-
-				// Send the message back to the client with the audio link
-				s.writeMutex.Lock()
-				if err := conn.WriteJSON(msg); err != nil {
-					logger.Printf("Failed to send audio response to Bob client: %v", err)
-				}
-				s.writeMutex.Unlock()
+			// Send the message back to the client with the audio link
+			s.writeMutex.Lock()
+			if err := conn.WriteJSON(msg); err != nil {
+				logger.Printf("Failed to send audio response to Bob client: %v", err)
 			}
+			s.writeMutex.Unlock()
 
 			logger.Printf("Bob client sent: %s", msg.Text)
 			select {
@@ -156,6 +138,7 @@ func (s *BobServer) broadcastFromAI(ctx context.Context) {
 			conn := s.currentConn
 			s.connMutex.Unlock()
 
+			logger.Printf("%v", msg)
 			if conn != nil {
 				logger.Printf("Broadcasting to Bob client: %s", msg.Text)
 				s.writeMutex.Lock()

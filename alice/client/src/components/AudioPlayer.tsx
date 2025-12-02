@@ -11,54 +11,49 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
     url: audioPath || undefined,
-    waveColor: '#00fff0',        // Neon cyan
-    progressColor: '#ff006e',    // Hot magenta
-    cursorColor: '#4d4dff',      // Neon blue
-    barWidth: 3,
-    barGap: 2,
-    height: 250,                 // Massive waveform
+    waveColor: '#7a9b8e',        // Sage green (--color-sage)
+    progressColor: '#c45e3f',    // Terracotta (--color-terracotta)
+    cursorColor: '#b8956a',      // Gold (--color-gold)
+    barWidth: 2,
+    barGap: 4,
+    height: 180,                 // Editorial height
     autoplay: true,
     barRadius: 2,
   });
 
-  // Load new audio when audioPath changes
   useEffect(() => {
-    if (!wavesurfer || !audioPath || audioPath.trim() === '') return;
-
-    console.log('Loading audio:', audioPath);
-
-    wavesurfer.load(audioPath);
+    if (!wavesurfer) return;
 
     // Error handling
     const unsubError = wavesurfer.on('error', (err) => {
       console.error('WaveSurfer error:', err);
-      console.error('Failed to load audio from:', audioPath);
     });
 
     // Ready event
     const unsubReady = wavesurfer.on('ready', () => {
-      console.log('Audio ready, attempting autoplay...');
-      wavesurfer.play().catch((e) => {
-        console.error('Autoplay failed:', e);
-        console.log('User must click play button due to browser autoplay policy');
-      });
+      console.log('Audio ready');
     });
 
     return () => {
       unsubError();
       unsubReady();
     };
-  }, [wavesurfer, audioPath]);
+  }, [wavesurfer]);
 
   return (
     <div className="audio-player" role="region" aria-label="Audio player">
-      <h2>Audio:</h2>
+      <h2>Audio Response</h2>
       {audioPath ? (
-        <div style={{ width: '100%' }} aria-label="Audio waveform visualization">
-          <div ref={containerRef} style={{ width: '100%' }} role="application" aria-label="Audio playback controls" />
+        <div aria-label="Audio waveform visualization">
+          <div
+            ref={containerRef}
+            style={{ width: '100%' }}
+            role="application"
+            aria-label="Audio playback controls"
+          />
         </div>
       ) : (
-        <p role="status">No audio to play</p>
+        <p role="status">No audio available</p>
       )}
     </div>
   );

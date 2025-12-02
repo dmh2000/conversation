@@ -22,32 +22,23 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
   });
 
   useEffect(() => {
-    if (!wavesurfer || !audioPath || audioPath.trim() === '') return;
-
-    console.log('Loading audio:', audioPath);
-
-    wavesurfer.load(audioPath);
+    if (!wavesurfer) return;
 
     // Error handling
     const unsubError = wavesurfer.on('error', (err) => {
       console.error('WaveSurfer error:', err);
-      console.error('Failed to load audio from:', audioPath);
     });
 
     // Ready event
     const unsubReady = wavesurfer.on('ready', () => {
-      console.log('Audio ready, attempting autoplay...');
-      wavesurfer.play().catch((e) => {
-        console.error('Autoplay failed:', e);
-        console.log('User must click play button due to browser autoplay policy');
-      });
+      console.log('Audio ready');
     });
 
     return () => {
       unsubError();
       unsubReady();
     };
-  }, [wavesurfer, audioPath]);
+  }, [wavesurfer]);
 
   return (
     <div className="audio-player" role="region" aria-label="Audio player">

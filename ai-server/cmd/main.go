@@ -34,10 +34,10 @@ func main() {
 	aliceAIToServer := make(chan types.ConversationMessage, cfg.ChannelBuffer)
 
 	// BobAI -> AliceAI
-	bobToAlice := make(chan string, cfg.ChannelBuffer)
+	bobToAlice := make(chan types.ConversationMessage, cfg.ChannelBuffer)
 
 	// AliceAI -> BobAI (for context)
-	aliceToBob := make(chan string, cfg.ChannelBuffer)
+	aliceToBob := make(chan types.ConversationMessage, cfg.ChannelBuffer)
 
 	// Create server instances
 	aliceServer := server.NewAliceServer(cfg.AlicePort, aliceServerToAI, aliceAIToServer)
