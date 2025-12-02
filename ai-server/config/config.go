@@ -9,7 +9,6 @@ import (
 type Config struct {
 	AlicePort    int
 	BobPort      int
-	AudioDir     string
 	ChannelBuffer int
 }
 
@@ -18,7 +17,6 @@ func Load() *Config {
 	return &Config{
 		AlicePort:    getEnvInt("ALICE_PORT", 3001),
 		BobPort:      getEnvInt("BOB_PORT", 3002),
-		AudioDir:     getEnv("AUDIO_DIR", "./public/audio"),
 		ChannelBuffer: getEnvInt("CHANNEL_BUFFER", 10),
 	}
 }

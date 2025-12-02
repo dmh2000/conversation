@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 
 export interface Message {
   text: string;
-  audio: string;
 }
 
 const WS_URL = 'ws://localhost:3002';

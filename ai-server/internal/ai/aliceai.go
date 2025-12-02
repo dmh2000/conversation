@@ -81,13 +81,11 @@ func (a *AliceAI) processQuestion(msg types.ConversationMessage) error {
 	// ===============================
 	// create UI response
 	// ===============================
-	// create the mp3
 	text := strings.TrimPrefix(response.Text, "<alice>")
 	text = strings.TrimSuffix(text, "</alice>")
 
 	responseToAliceUI := types.ConversationMessage{
 		Text:  text,
-		Audio: "",
 	}
 
 	// Send to Alice server for display
@@ -152,20 +150,17 @@ func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.Co
 	// create AI response
 	aiMsg := types.ConversationMessage{
 		Text:  alice_says,
-		Audio: "",
 	}
 
 	// create UI response
 	text := strings.TrimPrefix(alice_says, "<alice>")
 	text = strings.TrimSuffix(text, "</alice>")
 
-	// create the mp3
+	// create the UI msg
 	uiMsg := types.ConversationMessage{
 		Text:  text,
-		Audio: "",
 	}
-	// uiMsg = tts.CreateMp3(context.Background(), uiMsg, "../../alice/client/public/audio", "/audio")
-
+	
 	// send it display
 	select {
 	case a.toAliceUI <- uiMsg:

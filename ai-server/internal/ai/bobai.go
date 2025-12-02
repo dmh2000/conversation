@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/dmh2000/ai-server/internal/logger"
-	"github.com/dmh2000/ai-server/internal/tts"
 	"github.com/dmh2000/ai-server/internal/types"
 	llmclient "github.com/dmh2000/go-llmclient"
 )
@@ -75,10 +74,8 @@ func (b *BobAI) processInitialMessage(input string) {
 	// Send acknowledgment to Bob client
 	initialMessage := types.ConversationMessage{
 		Text:  input,
-		Audio: "",
 	}
 
-	// initialMessage = tts.CreateMp3(context.Background(), initialMessage, "../../bob/client/public/audio", "/audio")
 	logger.Printf("Bob initial message: %v", initialMessage)
 
 	select {
@@ -96,7 +93,6 @@ func (b *BobAI) processInitialMessage(input string) {
 
 	questionMsg := types.ConversationMessage{
 		Text:  question,
-		Audio: "",
 	}
 
 	select {
@@ -163,19 +159,15 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 	logger.Printf("%s", question)
 	questionToAlice := types.ConversationMessage{
 		Text:  question,
-		Audio: "",
 	}
 
-	// create the mp3
+	// create the UI msg
 	text := strings.TrimPrefix(questionToAlice.Text, "<bob>")
 	text = strings.TrimSuffix(text, "</bob>")
 
 	uiMsg := types.ConversationMessage{
 		Text:  text,
-		Audio: "",
 	}
-
-	uiMsg = tts.CreateMp3(context.Background(), uiMsg, "../../bob/client/public/audio", "/audio")
 
 	// send it display
 	select {

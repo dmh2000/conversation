@@ -108,12 +108,10 @@ func (s *BobServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		// Forward text to AI if present
 		if msg.Text != "" {
-			// msg := tts.CreateMp3(r.Context(), msg, "../../bob/client/public/audio", "/audio")
-
-			// Send the message back to the client with the audio link
+			// Send the message back to the client
 			s.writeMutex.Lock()
 			if err := conn.WriteJSON(msg); err != nil {
-				logger.Printf("Failed to send audio response to Bob client: %v", err)
+				logger.Printf("Failed to send response to Bob client: %v", err)
 			}
 			s.writeMutex.Unlock()
 

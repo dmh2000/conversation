@@ -1,6 +1,5 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
 import './App.css';
-import { AudioPlayer } from './components/AudioPlayer';
 import { useWebSocket } from './services/websocketClient';
 import type { Message } from './services/websocketClient';
 
@@ -8,13 +7,11 @@ function App() {
   const [message, setMessage] = useState<string>('');
   const [isStarted, setIsStarted] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleMessage = useCallback((receivedMessage: Message) => {
     console.log('Received message:', receivedMessage);
     setMessage(receivedMessage.text);
-    setCurrentAudio(receivedMessage.audio || null);
   }, []);
 
   const { isConnected, send } = useWebSocket(handleMessage);
@@ -109,7 +106,6 @@ function App() {
               {message}
             </p>
             <div className="message-divider" aria-hidden="true"></div>
-            <AudioPlayer audioPath={currentAudio || ''} />
           </>
         ) : (
           <p

@@ -5,7 +5,6 @@ go 1.25.3
 require (
 	github.com/dmh2000/go-llmclient v1.0.0
 	github.com/gorilla/websocket v1.5.3
-	google.golang.org/genai v1.36.0
 )
 
 require (
@@ -23,7 +22,6 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/generative-ai-go v0.20.1 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect

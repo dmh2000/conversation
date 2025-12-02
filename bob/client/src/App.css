@@ -265,47 +265,6 @@
   animation: fadeIn var(--duration-slow) var(--easing) 500ms backwards;
 }
 
-/* Audio Player Section */
-.audio-player {
-  width: 100%;
-  padding: 0;
-  background: transparent;
-  border: none;
-  animation: fadeIn var(--duration-slow) var(--easing) 600ms backwards;
-}
-
-.audio-player h2 {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0 0 var(--space-md) 0;
-}
-
-.audio-player > div:first-of-type {
-  width: 100%;
-  background: transparent;
-  box-shadow: var(--shadow-soft);
-  border-radius: 4px;
-  padding: var(--space-lg);
-  transition: box-shadow var(--duration-base) var(--easing);
-}
-
-.audio-player > div:first-of-type:hover {
-  box-shadow: var(--shadow-medium);
-}
-
-.audio-player p {
-  color: var(--color-gray);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-style: italic;
-  text-align: center;
-  margin: var(--space-lg) 0;
-}
-
 /* ===========================
    ANIMATIONS
    =========================== */
@@ -397,10 +356,6 @@
   .message::after {
     right: -10px;
     font-size: 4rem;
-  }
-
-  .audio-player > div:first-of-type {
-    padding: var(--space-md);
   }
 }
 

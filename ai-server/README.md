@@ -29,8 +29,6 @@ ai-server/
 │       └── message.go       # Shared types
 ├── config/
 │   └── config.go            # Configuration
-└── public/
-    └── audio/               # Audio files (future)
 ```
 
 ## Building
@@ -58,7 +56,6 @@ go run ./cmd/main.go
 Environment variables (all optional):
 - `ALICE_PORT`: Port for Alice WebSocket server (default: 3001)
 - `BOB_PORT`: Port for Bob WebSocket server (default: 3002)
-- `AUDIO_DIR`: Directory for audio files (default: ./public/audio)
 - `CHANNEL_BUFFER`: Buffer size for Go channels (default: 10)
 
 ## Message Format
@@ -66,8 +63,7 @@ Environment variables (all optional):
 WebSocket messages are JSON:
 ```json
 {
-  "text": "Message text",
-  "audio": "/audio/file.mp3"
+  "text": "Message text"
 }
 ```
 
@@ -104,7 +100,6 @@ WebSocket messages are JSON:
 ## Future Enhancements
 
 1. **LLM Integration**: Replace dummy responses with actual AI-generated content
-2. **Audio Generation**: Add text-to-speech for audio responses
-3. **Conversation Context**: Maintain conversation history
-4. **Multiple Conversations**: Support concurrent conversation sessions
-5. **Persistence**: Save conversation history to database
+2. **Conversation Context**: Maintain conversation history
+3. **Multiple Conversations**: Support concurrent conversation sessions
+4. **Persistence**: Save conversation history to database
