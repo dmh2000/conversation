@@ -1,15 +1,23 @@
 # Bob Client
 
-Bob is a React-based web application that allows users to send questions to Alice through the AI Server. It features a cyberpunk-themed input interface for composing questions and displays responses from the conversation with a sleek, neon-styled UI.
+Bob is a React-based web application that allows users to send questions to Alice through the AI Server. It features a cyberpunk-themed interface for composing questions and displays text responses from the conversation with a sleek, neon-styled UI.
 
 ## Architecture
 
 ```
-Bob Client → WebSocket (Port 3002) → AI Server → Bob AI Persona
-                                             ↓
-                                        Sends questions to Alice
-                                        Receives answers
+User Input → Bob Client (React) → WebSocket (Port 3002) → AI Server
+                                                              ↓
+                                                          Bob AI Persona
+                                                              ↓
+                                                          Alice AI Persona
+                                                              ↓
+                                           Response → Bob Client (Display)
 ```
+
+**Key Components:**
+- **Bob Client**: React web application (this directory)
+- **AI Server**: Go-based WebSocket server managing communication between Bob and Alice personas
+- **Port 3002**: Bob client connects to BobServer WebSocket endpoint
 
 ## Features
 
@@ -27,21 +35,25 @@ Bob Client → WebSocket (Port 3002) → AI Server → Bob AI Persona
 ## Project Structure
 
 ```
-bob/client/
-├── src/
-│   ├── App.tsx                    # Main application component
-│   ├── components/
-│   │   └── MessageDisplay.tsx     # Message display with animations
-│   ├── services/
-│   │   └── websocketClient.ts     # WebSocket connection management
-│   ├── App.css                    # Cyberpunk theme styling
-│   ├── index.css                  # Global styles and CSS variables
-│   └── main.tsx                   # Application entry point
-├── public/                        # Static assets
-├── index.html
-├── package.json
-└── vite.config.ts
+bob/
+├── client/                        # React web application
+│   ├── src/
+│   │   ├── App.tsx                # Main application component
+│   │   ├── components/
+│   │   │   └── MessageDisplay.tsx # Message display with animations
+│   │   ├── services/
+│   │   │   └── websocketClient.ts # WebSocket connection hook
+│   │   ├── App.css                # Component and cyberpunk theme styles
+│   │   ├── index.css              # Global styles and CSS variables
+│   │   └── main.tsx               # Application entry point
+│   ├── public/                    # Static assets
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.ts
+└── README.md                      # This file
 ```
+
+**Note**: Bob does not have a local server. It connects to the shared AI Server located in the `ai-server/` directory at the project root.
 
 ## Setup and Installation
 
@@ -120,8 +132,8 @@ To change the port, edit line 28 in `src/App.tsx`.
    - Bob AI processes your question and forwards to Alice
 
 6. **View Response**:
-   - Responses from the conversation appear in the main area
-   - Audio plays automatically if included
+   - Responses from the conversation appear in the main display area
+   - Messages are shown with animated fade-in effects and neon styling
 
 ## Message Format
 
@@ -208,11 +220,12 @@ Message display component featuring:
 
 ## Technologies Used
 
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **WebSocket API** - Real-time communication
+- **React 19** - UI framework with modern hooks
+- **TypeScript** - Type safety and enhanced development experience
+- **Vite** - Fast build tool and development server
+- **WebSocket API** - Real-time bidirectional communication
 - **Orbitron & Rajdhani** - Google Fonts for cyberpunk typography
+- **CSS3** - Modern animations, grid, flexbox, and custom properties
 
 ## Styling
 
@@ -277,46 +290,75 @@ The textarea includes a smart word counter:
 
 ## Integration with AI Server
 
-Bob client integrates with the AI Server architecture:
+Bob client integrates with the Go-based AI Server architecture:
 
-1. Connects to BobServer WebSocket (port 3002)
-2. Sends user questions to Bob AI persona
-3. Bob AI processes and forwards to Alice AI
-4. Receives responses from the conversation
-5. Displays text with animated effects
+1. **Connection**: Connects to BobServer WebSocket endpoint (port 3002)
+2. **Send Question**: User submits question from Bob client
+3. **Server Processing**:
+   - BobServer receives question
+   - Bob AI persona processes the question
+   - Bob AI forwards to Alice AI persona via Go channels
+   - Alice AI generates response
+   - Response flows back through Bob AI
+4. **Display Response**: Bob client receives and displays the response with animated effects
 
-The Bob AI persona on the server:
-- Receives initial questions from Bob client
-- Processes questions (future LLM integration)
-- Forwards to Alice AI
-- Receives answers from Alice
-- Sends responses back to Bob client
+**AI Server Components** (located in `ai-server/` directory):
+- **BobServer**: WebSocket server on port 3002 for Bob clients
+- **Bob AI**: Persona that handles question processing and conversation management
+- **Alice AI**: Persona that generates answers
+- **AliceServer**: WebSocket server on port 3001 for Alice clients (displays the conversation from Alice's perspective)
+
+**Message Flow**: Bob Client → BobServer → Bob AI → Alice AI → Bob AI → BobServer → Bob Client
 
 ## Conversation Flow
 
 ```
-User Input → Bob Client → BobServer → Bob AI
-                                        ↓
-                                   Alice AI
-                                        ↓
-                             Alice Client Display
-                                        ↓
-                                    Bob AI
-                                        ↓
-                            Bob Client Display
+┌─────────────┐
+│ User Input  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────┐
+│  Bob Client     │ (Port 5174, this app)
+│  (React UI)     │
+└────────┬────────┘
+         │ WebSocket
+         ▼
+┌─────────────────┐
+│  BobServer      │ (Port 3002, in ai-server/)
+└────────┬────────┘
+         │ Go Channel
+         ▼
+┌─────────────────┐
+│  Bob AI Persona │ (in ai-server/)
+└────────┬────────┘
+         │ Go Channel
+         ▼
+┌─────────────────┐
+│ Alice AI Persona│ (in ai-server/)
+└────────┬────────┘
+         │ Go Channel (response)
+         ▼
+┌─────────────────┐
+│ BobServer       │ (sends response to Bob Client)
+└────────┬────────┘
+         │ WebSocket
+         ▼
+┌─────────────────┐
+│ Bob Client      │ (displays response)
+│ MessageDisplay  │
+└─────────────────┘
 ```
 
 ## Future Enhancements
 
-- Voice input for question composition
-- Conversation history display with scrollable timeline
-- Question templates/suggestions
-- Alternative theme options (keep cyberpunk, add others)
-- Multi-language support
-- Message editing before sending
-- Conversation branching and threading
-- Save/export conversation history
-- Customizable color schemes within cyberpunk theme
-- Sound effects for message sending/receiving
-- Dark/light mode toggle (maintaining cyberpunk aesthetic)
-- Animation intensity controls for accessibility
+- **LLM Integration**: Full integration with language models (in progress on server)
+- **Conversation History**: Display scrollable timeline of past exchanges
+- **Question Templates**: Pre-defined question formats and suggestions
+- **Message Editing**: Edit questions before sending
+- **Export Conversations**: Save/export conversation history as JSON or text
+- **Voice Input**: Speech-to-text for question composition
+- **Accessibility Controls**: Animation intensity and contrast adjustments
+- **Customization**: User-selectable color schemes within cyberpunk theme
+- **Sound Effects**: Audio feedback for message sending/receiving
+- **Multi-language**: Support for questions and responses in multiple languages
