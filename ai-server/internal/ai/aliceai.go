@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	_ "embed"
+	"encoding/xml"
 	"fmt"
 	"strings"
 
@@ -85,7 +86,7 @@ func (a *AliceAI) processQuestion(msg types.ConversationMessage) error {
 	text = strings.TrimSuffix(text, "</alice>")
 
 	responseToAliceUI := types.ConversationMessage{
-		Text:  text,
+		Text: text,
 	}
 
 	// Send to Alice server for display
@@ -109,11 +110,18 @@ func (a *AliceAI) processQuestion(msg types.ConversationMessage) error {
 	return nil
 }
 
-func validateResonse(response string) error {
-	if strings.Contains(response, "<bob>") {
-		return fmt.Errorf("question has bob")
+type AliceQuestion struct {
+	XMLName xml.Name `xml:"response"`
+	Text    string   `xml:"alice"`
+}
+
+func validateResonse(response string) string {
+	var r BobQuestion
+	err := xml.Unmarshal([]byte(response), &r)
+	if err != nil {
+		return "<alice>Hmm, can you repeat the question?</alice>"
 	}
-	return nil
+	return response
 }
 
 func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.ConversationMessage, error) {
@@ -139,17 +147,14 @@ func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.Co
 		return msg, err
 	}
 
-	err = validateResonse(alice_says)
-	if err != nil {
-		return msg, err
-	}
+	alice_says = validateResonse(alice_says)
 
 	// add alice to context
 	a.context = append(a.context, alice_says)
 
 	// create AI response
 	aiMsg := types.ConversationMessage{
-		Text:  alice_says,
+		Text: alice_says,
 	}
 
 	// create UI response
@@ -158,9 +163,9 @@ func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.Co
 
 	// create the UI msg
 	uiMsg := types.ConversationMessage{
-		Text:  text,
+		Text: text,
 	}
-	
+
 	// send it display
 	select {
 	case a.toAliceUI <- uiMsg:

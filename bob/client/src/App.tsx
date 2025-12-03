@@ -1,17 +1,18 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
-import './App.css';
 import { useWebSocket } from './services/websocketClient';
 import type { Message } from './services/websocketClient';
+import { MessageDisplay } from './components/MessageDisplay';
+import './App.css';
 
 function App() {
-  const [message, setMessage] = useState<string>('');
+  const [currentMessage, setCurrentMessage] = useState<Message | null>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [inputText, setInputText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleMessage = useCallback((receivedMessage: Message) => {
-    console.log('Received message:', receivedMessage);
-    setMessage(receivedMessage.text);
+  const handleMessage = useCallback((message: Message) => {
+    console.log('Received message:', message);
+    setCurrentMessage(message);
   }, []);
 
   const { isConnected, send } = useWebSocket(handleMessage);
@@ -46,7 +47,7 @@ function App() {
   if (!isStarted) {
     return (
       <div className="App">
-        <header className="App-header">
+        <div className="start-screen">
           <div className="initial-input-container">
             <h1>Bob</h1>
             <textarea
@@ -74,48 +75,27 @@ function App() {
               Go Ask Alice
             </button>
           </div>
-        </header>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="App">
-      <header className="message-header" role="banner">
+    <div >
+      <header role="banner">
         <h1>Bob</h1>
         <div
-          className={`connection-status ${isConnected ? 'connected' : ''}`}
+          className={`status ${isConnected ? 'connected' : 'disconnected'}`}
           role="status"
           aria-live="polite"
           aria-label={isConnected ? 'Connected to server' : 'Disconnected from server'}
         >
-          <span className="status-dot" aria-hidden="true"></span>
-          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          {isConnected ? 'Connected' : 'Disconnected'}
         </div>
       </header>
 
-      <main className="message-content" role="main">
-        {message ? (
-          <>
-            <p
-              className="message"
-              role="region"
-              aria-label="Received message"
-              aria-live="polite"
-            >
-              {message}
-            </p>
-            <div className="message-divider" aria-hidden="true"></div>
-          </>
-        ) : (
-          <p
-            className="message"
-            role="status"
-            aria-live="polite"
-          >
-            Awaiting response...
-          </p>
-        )}
+      <main role="main">
+        <MessageDisplay text={currentMessage?.text || ''} />
       </main>
     </div>
   );

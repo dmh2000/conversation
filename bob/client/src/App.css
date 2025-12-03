@@ -1,3 +1,11 @@
+.app {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
 .App {
   width: 100%;
   min-height: 100vh;
@@ -5,9 +13,9 @@
 }
 
 /* ===========================
-   INITIAL INPUT SCREEN - Editorial Composition
+   INITIAL INPUT SCREEN - Cyberpunk Style
    =========================== */
-.App-header {
+.start-screen {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -26,122 +34,107 @@
   animation: fadeIn var(--duration-slow) var(--easing);
 }
 
-/* Title "Bob" */
 .initial-input-container h1 {
   font-size: var(--text-3xl);
-  margin: 0 0 var(--space-xs) 0;
-  animation: slideUp var(--duration-slow) var(--easing-out);
-  position: relative;
+  margin: 0 0 var(--space-md) 0;
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
+  animation: slideUp var(--duration-slow) var(--easing);
 }
 
-.initial-input-container h1::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 0;
-  width: 60px;
-  height: 3px;
-  background: var(--color-terracotta);
-  animation: drawLine 400ms var(--easing-out) 200ms backwards;
-}
-
-@keyframes drawLine {
+@keyframes slideUp {
   from {
-    width: 0;
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-    width: 60px;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Textarea - Editorial Treatment */
+/* Textarea - Cyberpunk Style */
 .initial-input-container textarea {
-  width: 60%;
+  width: 100%;
   min-height: 120px;
   max-height: 400px;
-  padding: var(--space-md) 0;
+  padding: var(--space-md);
   font-family: var(--font-body);
-  font-size: var(--text-xl);
-  line-height: 1.8;
-  color: var(--color-charcoal);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid var(--color-terracotta);
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background: rgba(10, 10, 30, 0.6);
+  border: 2px solid var(--color-neon-cyan);
+  border-radius: 4px;
   resize: none;
-  overflow: hidden;
+  overflow-y: auto;
   outline: none;
-  animation: fadeIn var(--duration-slow) var(--easing) 400ms backwards;
-  transition: border-bottom-width var(--duration-base) var(--easing),
-              border-color var(--duration-base) var(--easing);
+  animation: fadeIn var(--duration-slow) var(--easing) 200ms backwards;
+  transition: border-color var(--duration-base) var(--easing),
+              box-shadow var(--duration-base) var(--easing);
+  box-shadow: 0 0 10px rgba(0, 255, 240, 0.2);
 }
 
 .initial-input-container textarea::placeholder {
-  color: var(--color-gray-light);
-  font-style: italic;
+  color: var(--color-text-secondary);
+  opacity: 0.6;
 }
 
 .initial-input-container textarea:focus {
-  border-bottom-width: 3px;
-  border-bottom-color: var(--color-terracotta);
+  border-color: var(--color-neon-cyan);
+  box-shadow: var(--glow-cyan);
 }
 
 /* Word Counter */
 .word-counter {
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: var(--text-xs);
-  color: var(--color-gray);
+  color: var(--color-text-secondary);
   align-self: flex-end;
-  margin-top: calc(var(--space-xs) * -1);
-  margin-right: calc(40% + var(--space-sm));
-  animation: fadeIn var(--duration-slow) var(--easing) 500ms backwards;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: fadeIn var(--duration-slow) var(--easing) 300ms backwards;
   transition: color var(--duration-fast) var(--easing);
 }
 
 .word-counter.near-limit {
-  color: var(--color-terracotta);
+  color: var(--color-neon-magenta);
   font-weight: 600;
+  animation: pulse 1s ease-in-out infinite;
 }
 
 /* Go Ask Alice Button */
 .go-ask-alice-button {
   margin-top: var(--space-md);
-  animation: fadeIn var(--duration-slow) var(--easing) 600ms backwards;
+  animation: fadeIn var(--duration-slow) var(--easing) 400ms backwards;
 }
 
-/* Decorative Background Quotation Mark */
-.initial-input-container::before {
-  content: '\201C';
-  position: absolute;
-  top: 10%;
-  right: 5%;
-  font-family: var(--font-display);
-  font-size: 20rem;
-  color: var(--color-cream-dark);
-  opacity: 0.5;
-  line-height: 1;
-  pointer-events: none;
-  animation: fadeIn var(--duration-slow) var(--easing) 800ms backwards;
-  z-index: -1;
+.go-ask-alice-button:disabled {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.go-ask-alice-button:disabled::before {
+  display: none;
 }
 
 /* ===========================
-   MESSAGE DISPLAY SCREEN - Editorial Layout
+   HEADER - Minimalist Status
    =========================== */
-
-/* Fixed Header */
-.message-header {
+header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  padding: var(--space-md) var(--space-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--space-xl);
   backdrop-filter: blur(10px);
-  background: rgba(250, 248, 245, 0.9);
-  border-bottom: 1px solid rgba(42, 42, 42, 0.1);
+  background: rgba(10, 10, 30, 0.6);
+  border-bottom: 1px solid rgba(77, 77, 255, 0.3);
   z-index: 100;
   animation: slideDown var(--duration-slow) var(--easing);
 }
@@ -157,130 +150,72 @@
   }
 }
 
-.message-header h1 {
-  font-size: var(--text-xl);
+header h1 {
   margin: 0;
+  font-size: var(--text-xl);
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
 }
 
-/* Connection Status */
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
+.status {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 2px;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--color-gray);
+  letter-spacing: 0.1em;
+  transition: all var(--duration-base) var(--easing);
+  border: 1px solid;
 }
 
-.connection-status .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-gray-light);
+.status.connected {
+  background: rgba(0, 255, 240, 0.1);
+  color: var(--color-neon-cyan);
+  border-color: var(--color-neon-cyan);
+  animation: connectedPulse 2s ease-in-out infinite;
 }
 
-.connection-status.connected .status-dot {
-  background: var(--color-success);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
+@keyframes connectedPulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(107, 142, 127, 0.7);
+    box-shadow: 0 0 5px rgba(0, 255, 240, 0.5);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(107, 142, 127, 0);
+    box-shadow: 0 0 15px rgba(0, 255, 240, 0.8);
   }
 }
 
-/* Main Content Area */
-.message-content {
-  min-height: 100vh;
-  padding: calc(70px + var(--space-2xl)) var(--space-xl) var(--space-2xl);
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xl);
-}
-
-/* Message Display - Pull Quote Style */
-.message {
-  position: relative;
-  max-width: 70%;
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--color-charcoal);
-  padding: var(--space-xl) 0;
-  text-align: left;
-  animation: messageArrive var(--duration-slow) var(--easing) 400ms backwards;
-}
-
-@keyframes messageArrive {
-  from {
-    opacity: 0;
-    transform: scale(0.98) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Decorative Quotation Marks */
-.message::before {
-  content: '\201C';
-  position: absolute;
-  top: -20px;
-  left: -40px;
-  font-size: 6rem;
-  color: var(--color-terracotta);
-  opacity: 0.3;
-  line-height: 1;
-  animation: fadeIn var(--duration-base) var(--easing) 600ms backwards;
-}
-
-.message::after {
-  content: '\201D';
-  position: absolute;
-  bottom: -40px;
-  right: -20px;
-  font-size: 6rem;
-  color: var(--color-terracotta);
-  opacity: 0.3;
-  line-height: 1;
-  animation: fadeIn var(--duration-base) var(--easing) 700ms backwards;
-}
-
-/* Elegant Divider */
-.message-divider {
-  width: 40%;
-  height: 1px;
-  background: var(--color-gray-light);
-  margin: var(--space-lg) 0;
-  animation: fadeIn var(--duration-slow) var(--easing) 500ms backwards;
+.status.disconnected {
+  background: rgba(255, 0, 110, 0.1);
+  color: var(--color-neon-magenta);
+  border-color: var(--color-neon-magenta);
 }
 
 /* ===========================
-   ANIMATIONS
+   MAIN CONTENT AREA
    =========================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+main {
+  min-height: 100vh;
+  padding: calc(80px + var(--space-xl)) var(--space-lg) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-@keyframes slideUp {
+/* ===========================
+   MESSAGE DISPLAY - Hero Treatment
+   =========================== */
+.message-display {
+  animation: fadeInUp var(--duration-slow) var(--easing) 0.2s backwards;
+  padding: var(--space-xl) 0;
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -288,25 +223,74 @@
   }
 }
 
-/* ===========================
-   RESPONSIVE DESIGN
-   =========================== */
-@media (max-width: 1024px) {
-  .initial-input-container textarea {
-    width: 70%;
-  }
+.message-display h2 {
+  display: none; /* Remove labels per design guide */
+}
 
-  .word-counter {
-    margin-right: calc(30% + var(--space-sm));
-  }
+.message-display p {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  margin: 0;
+  min-height: 3rem;
+  text-align: center;
+  letter-spacing: 0.02em;
+  animation: textGlow 3s ease-in-out infinite, messageArrive var(--duration-slow) var(--easing);
+  position: relative;
+}
 
-  .message {
-    max-width: 80%;
+/* New message arrival animation */
+@keyframes messageArrive {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
 }
 
+/* Subtle text glow effect */
+@keyframes textGlow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4),
+                 0 0 30px rgba(0, 255, 240, 0.2);
+  }
+}
+
+/* Empty state styling */
+.message-display p:empty::before {
+  content: 'AWAITING TRANSMISSION...';
+  color: var(--color-text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  letter-spacing: 0.15em;
+  opacity: 0.5;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 49%, 100% {
+    opacity: 0.5;
+  }
+  50%, 99% {
+    opacity: 0.2;
+  }
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
 @media (max-width: 768px) {
-  .App-header {
+  .start-screen {
     padding: var(--space-md);
   }
 
@@ -319,66 +303,52 @@
   }
 
   .initial-input-container textarea {
-    width: 90%;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
   }
 
-  .word-counter {
-    margin-right: calc(10% + var(--space-sm));
-  }
-
-  .message-header {
-    padding: 0 var(--space-md);
-    height: 60px;
+  header {
     flex-direction: column;
-    gap: var(--space-xs);
-    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
   }
 
-  .message-header h1 {
+  header h1 {
     font-size: var(--text-lg);
   }
 
-  .message-content {
-    padding: calc(90px + var(--space-lg)) var(--space-md) var(--space-lg);
+  main {
+    padding: calc(120px + var(--space-md)) var(--space-md) var(--space-lg);
+    gap: var(--space-lg);
   }
 
-  .message {
-    max-width: 90%;
+  .message-display p {
     font-size: var(--text-xl);
-  }
-
-  .message::before {
-    left: -20px;
-    font-size: 4rem;
-  }
-
-  .message::after {
-    right: -10px;
-    font-size: 4rem;
+    text-align: left;
   }
 }
 
 @media (max-width: 480px) {
-  .initial-input-container::before {
-    font-size: 12rem;
+  .initial-input-container h1 {
+    font-size: var(--text-xl);
   }
 
-  .initial-input-container textarea {
-    width: 100%;
+  .start-screen h1 {
+    font-size: var(--text-2xl);
   }
 
-  .word-counter {
-    margin-right: 0;
-    align-self: flex-end;
+  .message-display p {
+    font-size: var(--text-lg);
   }
+}
 
-  .message {
-    max-width: 100%;
-    padding: var(--space-md) 0;
+/* ===========================
+   ENTRANCE ANIMATIONS
+   =========================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-
-  .message-divider {
-    width: 60%;
+  to {
+    opacity: 1;
   }
 }

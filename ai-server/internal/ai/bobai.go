@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	_ "embed"
+	"encoding/xml"
 	"fmt"
 	"strings"
 
@@ -73,7 +74,7 @@ func (b *BobAI) processInitialMessage(input string) {
 
 	// Send acknowledgment to Bob client
 	initialMessage := types.ConversationMessage{
-		Text:  input,
+		Text: input,
 	}
 
 	logger.Printf("Bob initial message: %v", initialMessage)
@@ -92,7 +93,7 @@ func (b *BobAI) processInitialMessage(input string) {
 	b.context = append(b.context, question)
 
 	questionMsg := types.ConversationMessage{
-		Text:  question,
+		Text: question,
 	}
 
 	select {
@@ -122,11 +123,18 @@ func (b *BobAI) processResponse(answerFromAlice types.ConversationMessage) {
 
 }
 
-func validateQuestion(question string) error {
-	if strings.Contains(question, "<alice>") {
-		return fmt.Errorf("question has alice")
+type BobQuestion struct {
+	XMLName xml.Name `xml:"question"`
+	Text    string   `xml:"bob"`
+}
+
+func validateQuestion(question string) string {
+	var r BobQuestion
+	err := xml.Unmarshal([]byte(question), &r)
+	if err != nil {
+		return "<bob>Opps I lost my train of thought. Where was I?</bob>"
 	}
-	return nil
+	return question
 }
 
 func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage) (types.ConversationMessage, error) {
@@ -151,14 +159,15 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 		return answerFromAlice, err
 	}
 
-	err = validateQuestion(question)
+	// makie sure the questions the ai generated is in the proper xml format
+	question = validateQuestion(question)
 
 	// add alice to context
 	b.context = append(b.context, question)
 
 	logger.Printf("%s", question)
 	questionToAlice := types.ConversationMessage{
-		Text:  question,
+		Text: question,
 	}
 
 	// create the UI msg
@@ -166,7 +175,7 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 	text = strings.TrimSuffix(text, "</bob>")
 
 	uiMsg := types.ConversationMessage{
-		Text:  text,
+		Text: text,
 	}
 
 	// send it display
