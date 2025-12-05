@@ -1,22 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 export interface Message {
-  text: string;
+  type?: string;
+  text?: string;
 }
 
 const WS_URL = 'ws://localhost:3002';
 
-export function useWebSocket(onMessage: (message: Message) => void) {
+export const MESSAGE_TYPE_RESET = 'reset';
+export const MESSAGE_TYPE_RESET_ACK = 'reset_ack';
+
+export function useWebSocket(onMessage: (message: Message) => void, onResetAck?: () => void) {
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<number | undefined>(undefined);
   const onMessageRef = useRef(onMessage);
-  const connectRef = useRef<() => void>(() => { }); // Create a ref for the connect function
+  const onResetAckRef = useRef(onResetAck);
+  const connectRef = useRef<() => void>(() => { });
 
-  // Update onMessageRef when onMessage changes
+  // Update refs when callbacks change
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
+
+  useEffect(() => {
+    onResetAckRef.current = onResetAck;
+  }, [onResetAck]);
 
   useEffect(() => {
     const connect = () => {
@@ -32,7 +41,17 @@ export function useWebSocket(onMessage: (message: Message) => void) {
           try {
             const message = JSON.parse(event.data) as Message;
             console.log('Received message:', message);
-            onMessageRef.current(message); // Use ref for onMessage
+
+            // Handle reset acknowledgment
+            if (message.type === MESSAGE_TYPE_RESET_ACK) {
+              console.log('Reset acknowledged by server');
+              if (onResetAckRef.current) {
+                onResetAckRef.current();
+              }
+              return;
+            }
+
+            onMessageRef.current(message);
           } catch (error) {
             console.error('Failed to parse message:', error);
           }
@@ -46,7 +65,7 @@ export function useWebSocket(onMessage: (message: Message) => void) {
           // Attempt to reconnect after 3 seconds
           reconnectTimeoutRef.current = window.setTimeout(() => {
             console.log('Attempting to reconnect...');
-            connectRef.current(); // Call the function via its ref
+            connectRef.current();
           }, 3001);
         };
 
@@ -59,7 +78,7 @@ export function useWebSocket(onMessage: (message: Message) => void) {
         console.error('Failed to create WebSocket connection:', error);
       }
     };
-    connectRef.current = connect; // Assign the current connect function to the ref
+    connectRef.current = connect;
 
     connect();
 
@@ -75,13 +94,17 @@ export function useWebSocket(onMessage: (message: Message) => void) {
         wsRef.current.close();
       }
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
 
-  const send = (data: { text: string }) => {
+  const send = useCallback((data: Message) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data));
     }
-  };
+  }, []);
 
-  return { isConnected, send };
+  const sendReset = useCallback(() => {
+    send({ type: MESSAGE_TYPE_RESET });
+  }, [send]);
+
+  return { isConnected, send, sendReset };
 }

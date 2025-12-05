@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
@@ -19,12 +20,15 @@ var systemPromptBob string
 
 // BobAI simulates Bob persona that asks questions
 type BobAI struct {
-	fromBobUI <-chan string
-	toBobUI   chan<- types.ConversationMessage
-	toAlice   chan<- types.ConversationMessage
-	fromAlice <-chan types.ConversationMessage
-	context   []string
-	client    llmclient.Client
+	fromBobUI      <-chan string
+	toBobUI        chan<- types.ConversationMessage
+	toAlice        chan<- types.ConversationMessage
+	fromAlice      <-chan types.ConversationMessage
+	context        []string
+	client         llmclient.Client
+	paused         bool
+	pauseMutex     sync.Mutex
+	onStartNewConv func() // callback when new conversation starts
 }
 
 // NewBobAI creates a new Bob AI component
@@ -44,6 +48,35 @@ func NewBobAI(
 	}
 }
 
+// Reset clears the conversation context and pauses processing
+func (b *BobAI) Reset() {
+	b.pauseMutex.Lock()
+	b.paused = true
+	b.context = []string{}
+	b.pauseMutex.Unlock()
+	logger.Println("Bob AI context reset and paused")
+}
+
+// Resume allows the AI to process messages again
+func (b *BobAI) Resume() {
+	b.pauseMutex.Lock()
+	b.paused = false
+	b.pauseMutex.Unlock()
+	logger.Println("Bob AI resumed")
+}
+
+// isPaused returns whether the AI is paused
+func (b *BobAI) isPaused() bool {
+	b.pauseMutex.Lock()
+	defer b.pauseMutex.Unlock()
+	return b.paused
+}
+
+// SetStartNewConvCallback sets the callback for when a new conversation starts
+func (b *BobAI) SetStartNewConvCallback(fn func()) {
+	b.onStartNewConv = fn
+}
+
 // Start begins processing messages
 func (b *BobAI) Start(ctx context.Context) {
 	logger.Println("Bob AI started")
@@ -55,13 +88,22 @@ func (b *BobAI) Start(ctx context.Context) {
 			return
 
 		case msg := <-b.fromBobUI:
-			// Handle initial question/input from Bob client
+			// New message from UI - resume processing and notify Alice
+			b.Resume()
+			if b.onStartNewConv != nil {
+				b.onStartNewConv()
+			}
 			logger.Printf("Bob AI processing initial message")
 			b.processInitialMessage(msg)
 
 		case msg := <-b.fromAlice:
+			// Check if paused - if so, discard message
+			if b.isPaused() {
+				logger.Println("Bob AI is paused, discarding message from Alice")
+				continue
+			}
 			// Handle answer from Alice AI
-			logger.Printf("Bob AI received answer from Alice: %s", msg)
+			logger.Printf("Bob AI received answer from Alice")
 			b.processResponse(msg)
 		}
 	}
@@ -132,6 +174,12 @@ func validateQuestion(question string) string {
 	var r BobQuestion
 	err := xml.Unmarshal([]byte(question), &r)
 	if err != nil {
+		logger.Printf("Error unmarshalling response: %s", question)
+		logger.Printf("Error: %v", err)
+		if err.Error() == "unexpected EOF" {
+			// add the terminator to the response
+			return question + "</bob>"
+		}
 		return "<bob>Opps I lost my train of thought. Where was I?</bob>"
 	}
 	return question

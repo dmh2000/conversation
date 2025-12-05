@@ -19,6 +19,7 @@ type BobServer struct {
 	writeMutex  sync.Mutex
 	toAI        chan<- string
 	fromAI      <-chan types.ConversationMessage
+	onReset     func() // callback to reset AI state
 }
 
 // NewBobServer creates a new Bob WebSocket server
@@ -28,6 +29,11 @@ func NewBobServer(port int, toAI chan<- string, fromAI <-chan types.Conversation
 		toAI:   toAI,
 		fromAI: fromAI,
 	}
+}
+
+// SetResetCallback sets the callback function to reset AI state
+func (s *BobServer) SetResetCallback(fn func()) {
+	s.onReset = fn
 }
 
 // Start begins listening for WebSocket connections and handling messages
@@ -106,6 +112,22 @@ func (s *BobServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		// Handle reset message
+		if msg.Type == types.MessageTypeReset {
+			logger.Println("Bob client requested reset")
+			if s.onReset != nil {
+				s.onReset()
+			}
+			// Send acknowledgment
+			s.writeMutex.Lock()
+			ackMsg := types.ConversationMessage{Type: types.MessageTypeResetAck}
+			if err := conn.WriteJSON(ackMsg); err != nil {
+				logger.Printf("Failed to send reset acknowledgment: %v", err)
+			}
+			s.writeMutex.Unlock()
+			continue
+		}
+
 		// Forward text to AI if present
 		if msg.Text != "" {
 			// Send the message back to the client
@@ -136,9 +158,9 @@ func (s *BobServer) broadcastFromAI(ctx context.Context) {
 			conn := s.currentConn
 			s.connMutex.Unlock()
 
-			logger.Printf("%v", msg)
+			// logger.Printf("%v", msg)
 			if conn != nil {
-				logger.Printf("Broadcasting to Bob client: %s", msg.Text)
+				// logger.Printf("Broadcasting to Bob client: %s", msg.Text)
 				s.writeMutex.Lock()
 				if err := conn.WriteJSON(msg); err != nil {
 					logger.Printf("Failed to send message to Bob client: %v", err)

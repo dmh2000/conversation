@@ -28,6 +28,8 @@ You will be paired with Alice, a separate application that answers questions abo
    </bob>
    ```
 
+   The questions that bob sends should be no longer than 256 characters.
+
 2. Alice will answer the questions that Bob sends. 
   - Responses from Alice are in this format:
 
@@ -37,13 +39,16 @@ You will be paired with Alice, a separate application that answers questions abo
    </alice>
    ```
 
+
 3. Every XML output must:
 
+These rules are very important:
    - Use one and only one root element (either `<bob>` or `<alice>`).
    - Contain valid UTF-8 text.
    - Avoid illegal XML characters like `&`, `<`, or `>` inside text unless escaped.
    - Include no attributes unless explicitly requested.
    - Never include JSON, Markdown, or any non-XML markup.
+   - 
 
 4. Do not include commentary, explanations, or reasoning outside the <bob> or <alice> element. The XML must be ready for machine parsing directly.
 

@@ -15,7 +15,15 @@ function App() {
     setCurrentMessage(message);
   }, []);
 
-  const { isConnected, send } = useWebSocket(handleMessage);
+  const handleResetAck = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const { isConnected, send, sendReset } = useWebSocket(handleMessage, handleResetAck);
+
+  const handleRestart = () => {
+    sendReset();
+  };
 
   // Calculate word count
   const wordCount = useMemo(() => {
@@ -84,13 +92,24 @@ function App() {
     <div >
       <header role="banner">
         <h1>Bob</h1>
-        <div
-          className={`status ${isConnected ? 'connected' : 'disconnected'}`}
-          role="status"
-          aria-live="polite"
-          aria-label={isConnected ? 'Connected to server' : 'Disconnected from server'}
-        >
-          {isConnected ? 'Connected' : 'Disconnected'}
+        <div className="header-controls">
+          <button
+            className="restart-button"
+            onClick={handleRestart}
+            disabled={!isConnected}
+            aria-label="Restart conversation"
+            title="Restart conversation"
+          >
+            Restart
+          </button>
+          <div
+            className={`status ${isConnected ? 'connected' : 'disconnected'}`}
+            role="status"
+            aria-live="polite"
+            aria-label={isConnected ? 'Connected to server' : 'Disconnected from server'}
+          >
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </div>
         </div>
       </header>
 

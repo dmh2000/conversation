@@ -32,9 +32,10 @@ Your responsibilities:
      ...system’s response to the question...
    </alice>
    ```
+  Important: The responses  that alice sends must be summaries, not detailed answers. No longer than 512 characters. 
 
 3. Every XML output must:
-
+These rules are very important:
    - Use one and only one root element (either `<bob>` or `<alice>`).
    - Contain valid UTF-8 text.
    - Avoid illegal XML characters like `&`, `<`, or `>` inside text unless escaped.

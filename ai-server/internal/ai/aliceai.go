@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/dmh2000/ai-server/internal/logger"
 	"github.com/dmh2000/ai-server/internal/types"
@@ -27,6 +28,8 @@ type AliceAI struct {
 	toBob       chan<- types.ConversationMessage
 	context     []string
 	client      llmclient.Client
+	paused      bool
+	pauseMutex  sync.Mutex
 }
 
 // NewAliceAI creates a new Alice AI component
@@ -46,6 +49,30 @@ func NewAliceAI(
 	}
 }
 
+// Reset clears the conversation context and pauses processing
+func (a *AliceAI) Reset() {
+	a.pauseMutex.Lock()
+	a.paused = true
+	a.context = []string{}
+	a.pauseMutex.Unlock()
+	logger.Println("Alice AI context reset and paused")
+}
+
+// Resume allows the AI to process messages again
+func (a *AliceAI) Resume() {
+	a.pauseMutex.Lock()
+	a.paused = false
+	a.pauseMutex.Unlock()
+	logger.Println("Alice AI resumed")
+}
+
+// isPaused returns whether the AI is paused
+func (a *AliceAI) isPaused() bool {
+	a.pauseMutex.Lock()
+	defer a.pauseMutex.Unlock()
+	return a.paused
+}
+
 // Start begins processing messages
 func (a *AliceAI) Start(ctx context.Context) {
 	logger.Println("Alice AI started")
@@ -57,10 +84,15 @@ func (a *AliceAI) Start(ctx context.Context) {
 			return
 
 		case msg := <-a.fromAliceUI:
-			// Handle messages from Alice server (should not happen
+			// Handle messages from Alice server (should not happen)
 			logger.Printf("Alice AI received from server: %s", msg)
 
 		case question := <-a.fromBob:
+			// Check if paused - if so, discard message
+			if a.isPaused() {
+				logger.Println("Alice AI is paused, discarding message from Bob")
+				continue
+			}
 			// Handle questions from Bob AI
 			logger.Printf("Alice AI received question from Bob")
 			a.processQuestion(question)
@@ -119,6 +151,12 @@ func validateResonse(response string) string {
 	var r AliceQuestion
 	err := xml.Unmarshal([]byte(response), &r)
 	if err != nil {
+		logger.Printf("Error unmarshalling response: %s", response)
+		logger.Printf("Error: %v", err)
+		if err.Error() == "unexpected EOF" {
+			// add the terminator to the response
+			return response + "</alice>"
+		}
 		return "<alice>Hmm, can you repeat the question?</alice>"
 	}
 	return response

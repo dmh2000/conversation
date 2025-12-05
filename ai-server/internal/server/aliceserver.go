@@ -18,13 +18,19 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Resettable interface for AI components
+type Resettable interface {
+	Reset()
+}
+
 // AliceServer manages WebSocket connections for Alice client
 type AliceServer struct {
-	port          int
-	currentConn   *websocket.Conn
-	connMutex     sync.Mutex
-	toAI          chan<- string
-	fromAI        <-chan types.ConversationMessage
+	port        int
+	currentConn *websocket.Conn
+	connMutex   sync.Mutex
+	toAI        chan<- string
+	fromAI      <-chan types.ConversationMessage
+	onReset     func() // callback to reset AI state
 }
 
 // NewAliceServer creates a new Alice WebSocket server
@@ -34,6 +40,11 @@ func NewAliceServer(port int, toAI chan<- string, fromAI <-chan types.Conversati
 		toAI:   toAI,
 		fromAI: fromAI,
 	}
+}
+
+// SetResetCallback sets the callback function to reset AI state
+func (s *AliceServer) SetResetCallback(fn func()) {
+	s.onReset = fn
 }
 
 // Start begins listening for WebSocket connections and handling messages
@@ -112,6 +123,20 @@ func (s *AliceServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		// Handle reset message
+		if msg.Type == types.MessageTypeReset {
+			logger.Println("Alice client requested reset")
+			if s.onReset != nil {
+				s.onReset()
+			}
+			// Send acknowledgment
+			ackMsg := types.ConversationMessage{Type: types.MessageTypeResetAck}
+			if err := conn.WriteJSON(ackMsg); err != nil {
+				logger.Printf("Failed to send reset acknowledgment: %v", err)
+			}
+			continue
+		}
+
 		// Forward text to AI if present
 		if msg.Text != "" {
 			logger.Printf("Alice client sent: %s", msg.Text)
@@ -136,7 +161,7 @@ func (s *AliceServer) broadcastFromAI(ctx context.Context) {
 			s.connMutex.Unlock()
 
 			if conn != nil {
-				logger.Printf("Broadcasting to Alice client: %s", msg.Text)
+				// logger.Printf("Broadcasting to Alice client: %s", msg.Text)
 				if err := conn.WriteJSON(msg); err != nil {
 					logger.Printf("Failed to send message to Alice client: %v", err)
 				}

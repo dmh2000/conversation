@@ -47,6 +47,21 @@ func main() {
 	aliceAI := ai.NewAliceAI(aliceServerToAI, aliceAIToServer, bobToAlice, aliceToBob)
 	bobAI := ai.NewBobAI(bobServerToAI, bobAIToServer, bobToAlice, aliceToBob)
 
+	// Set up reset callbacks - both servers reset both AIs
+	resetBothAIs := func() {
+		aliceAI.Reset()
+		bobAI.Reset()
+		logger.Println("Both AI contexts have been reset")
+	}
+	aliceServer.SetResetCallback(resetBothAIs)
+	bobServer.SetResetCallback(resetBothAIs)
+
+	// When Bob starts a new conversation, resume Alice
+	bobAI.SetStartNewConvCallback(func() {
+		aliceAI.Resume()
+		logger.Println("Alice AI resumed for new conversation")
+	})
+
 	// Start AI components
 	go aliceAI.Start(ctx)
 	go bobAI.Start(ctx)
