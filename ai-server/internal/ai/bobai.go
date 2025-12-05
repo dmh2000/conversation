@@ -124,8 +124,8 @@ func (b *BobAI) processResponse(answerFromAlice types.ConversationMessage) {
 }
 
 type BobQuestion struct {
-	XMLName xml.Name `xml:"question"`
-	Text    string   `xml:"bob"`
+	XMLName xml.Name `xml:"bob"`
+	Text    string   `xml:"question"`
 }
 
 func validateQuestion(question string) string {

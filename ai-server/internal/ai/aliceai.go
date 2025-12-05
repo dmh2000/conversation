@@ -111,12 +111,12 @@ func (a *AliceAI) processQuestion(msg types.ConversationMessage) error {
 }
 
 type AliceQuestion struct {
-	XMLName xml.Name `xml:"response"`
-	Text    string   `xml:"alice"`
+	XMLName xml.Name `xml:"alice"`
+	Text    string   `xml:"response"`
 }
 
 func validateResonse(response string) string {
-	var r BobQuestion
+	var r AliceQuestion
 	err := xml.Unmarshal([]byte(response), &r)
 	if err != nil {
 		return "<alice>Hmm, can you repeat the question?</alice>"
