@@ -1,16 +1,34 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversation</title>
     <link rel="stylesheet" href="theme.css">
 </head>
-
 <body>
-    <a href="http://localhost:8001/" target="_blank" rel="noopener noreferrer">Alice</a>
-    <br />
-    <a href="http://localhost:8002/" target="_blank" rel="noopener noreferrer">Bob</a>
-    <br />
-</body>
+    <div class="theme-container">
+        <div class="theme-card">
+            <h1>Start A Conversation</h1>
+            <p class="theme-message-text">Click the button below to launch both Alice and Bob clients.</p>
+            <button onclick="startConversation()">Start Conversation</button>
+            <p id="popup-warning" style="display:none; color: var(--color-neon-magenta); margin-top: 1rem; font-size: 0.9rem;">
+                ⚠️ Popups blocked! Please allow popups for localhost to launch both windows.
+            </p>
+        </div>
+    </div>
 
+    <script>
+        function startConversation() {
+            const w1 = window.open('http://localhost:8001/', '_blank');
+            const w2 = window.open('http://localhost:8002/', '_blank');
+
+            if (!w1 || !w2 || w1.closed || w2.closed) {
+                document.getElementById('popup-warning').style.display = 'block';
+            } else {
+                document.getElementById('popup-warning').style.display = 'none';
+            }
+        }
+    </script>
+</body>
 </html>
