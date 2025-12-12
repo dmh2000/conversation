@@ -34,7 +34,7 @@ gemini/
 3.  **TCP Server:** Listen on a dedicated raw TCP port for external triggers.
 
 **Logic Flow (TCP to WebSocket):**
-1.  TCP Server listens on port `3001` (configurable).
+1.  TCP Server listens on port `8003` (configurable).
 2.  On `connection`: Log new TCP client.
 3.  On `data`:
     *   Accumulate incoming data into a buffer.
@@ -72,7 +72,7 @@ gemini/
 ### Phase 2: Backend Implementation
 1.  Create `gemini/server/src/index.ts`.
 2.  **Step 2a (HTTP & WS):** Set up Express and attach a `WebSocketServer` to it.
-3.  **Step 2b (TCP):** Use `net.createServer()` to listen on a separate port (e.g., 3001).
+3.  **Step 2b (TCP):** Use `net.createServer()` to listen on a separate port (e.g., 8003).
 4.  **Step 2c (Integration):** Implement the buffering logic to parse `{ JSON }` from the TCP stream and broadcast it to `wss.clients`.
 5.  **Step 2d (Test):** Create a simple test script (Node.js script or using `netcat`) to send a mock TCP message and verify the console logs.
 

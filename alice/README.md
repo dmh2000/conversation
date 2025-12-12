@@ -5,7 +5,7 @@ Alice is a React-based web application that displays answers from the Alice AI p
 ## Architecture
 
 ```
-Alice Client → WebSocket (Port 3001) → AI Server → Alice AI Persona
+Alice Client → WebSocket (Port 8003) → AI Server → Alice AI Persona
                                              ↓
                                         Receives questions
                                         Generates answers
@@ -46,7 +46,7 @@ alice/client/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- AI Server running on port 3001
+- AI Server running on port 8003
 
 ### Install Dependencies
 
@@ -86,15 +86,15 @@ npm run preview
 The WebSocket connection URL can be configured via environment variable:
 
 ```bash
-VITE_WS_URL=ws://localhost:3001 npm run dev
+VITE_WS_URL=ws://localhost:8003 npm run dev
 ```
 
-Default: `ws://localhost:3001`
+Default: `ws://localhost:8003`
 
 Configuration is in `src/services/websocketClient.ts`:
 
 ```typescript
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8003';
 ```
 
 ## Usage
@@ -212,7 +212,7 @@ The application uses modern CSS with:
 ### Cannot Connect to WebSocket
 
 - Ensure AI Server is running: `cd ../../ai-server && ./ai-server`
-- Check that port 3001 is not blocked by firewall
+- Check that port 8003 is not blocked by firewall
 - Verify WebSocket URL in browser console
 
 ### Audio Not Playing
@@ -232,7 +232,7 @@ The application uses modern CSS with:
 
 Alice client integrates with the AI Server architecture:
 
-1. Connects to AliceServer WebSocket (port 3001)
+1. Connects to AliceServer WebSocket (port 8003)
 2. Receives messages from Alice AI persona
 3. Displays text and plays audio
 4. Maintains connection with auto-reconnect

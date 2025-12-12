@@ -49,7 +49,7 @@ Both implementations follow a similar pattern but with different code organizati
 
 **Bob Implementation:**
 - Monolithic structure with all logic in `index.ts`
-- TCP server listens on port 3001
+- TCP server listens on port 8003
 - WebSocket server integrated with HTTP server on port 3000
 - Uses simpler indexOf-based JSON parsing
 
@@ -144,7 +144,7 @@ Both implementations handle streaming TCP data where JSON messages may arrive in
 
 **Bob:**
 - HTTP/WebSocket: 3000
-- TCP: 3001
+- TCP: 8003
 
 ## Working with This Repository
 

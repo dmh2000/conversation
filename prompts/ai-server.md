@@ -5,9 +5,9 @@
 @prompts/ai-server.jpg 
 # implement a server in the Go programming language
 The server will have 4 main components:
-- BobServer: WebSocket server listenting on port 3002 for connections from the Bob web app
+- BobServer: WebSocket server listenting on port 8004 for connections from the Bob web app
 - BobAI: a goroutine that will use an AI LLM to simulate a person named bob who asks questions
-- AliceServer: WebSocket server listening on port 3001 for connections from the Alice web app
+- AliceServer: WebSocket server listening on port 8003 for connections from the Alice web app
 - AliceAI : a goroutine that will use an AI LLM to simulate a person named Alice who answers questions
 
 There will be 3 Go channels:
@@ -33,14 +33,14 @@ Type ConversationMessage
 # BobServer and AliceServer functionality
 For now, this will be scaffolding out the process structure and will be built up later
 
-- the Alice web app WebSocket client will connect to localhost port 3001
-- the AliceServer will listen for a WebSocket connection on localhost port 3001
+- the Alice web app WebSocket client will connect to localhost port 8003
+- the AliceServer will listen for a WebSocket connection on localhost port 8003
 - only one WebSocket connection will be allowed at a time
 - if a WebSocket client closes its connection, the WebSocket server will listen for a new connection
 - when the AliceServer receives a message on the WebSocket, it will forward the the message 'text' data to the AliceAI channel. The AliceAI will response with a dummy message "Hello from Alice AI"
  
-- the Bob web app WebSocket client will connect to localhost port 3002 
-- The BobServer will listen for a WebSocket connection on localhost port 3002- only one WebSocket connection will be allowed at a time
+- the Bob web app WebSocket client will connect to localhost port 8004 
+- The BobServer will listen for a WebSocket connection on localhost port 8004- only one WebSocket connection will be allowed at a time
 - if a WebSocket client closes its connection, the WebSocket server will listen for a new connection
 - when the BobServer receives a message on the WebSocket, it will forward the message 'text' data to the BobAI channel. The BobAI will response with a dummy message "Hello from BobAI AI"
 

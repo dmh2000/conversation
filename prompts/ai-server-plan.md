@@ -6,9 +6,9 @@ Implement a Go-based WebSocket server that simulates a conversation between two 
 ## Architecture
 
 ### Components
-1. **BobServer** - WebSocket server listening on port 3002 for Bob web client
+1. **BobServer** - WebSocket server listening on port 8004 for Bob web client
 2. **BobAI** - Goroutine simulating Bob persona using LLM (asks questions)
-3. **AliceServer** - WebSocket server listening on port 3001 for Alice web client
+3. **AliceServer** - WebSocket server listening on port 8003 for Alice web client
 4. **AliceAI** - Goroutine simulating Alice persona using LLM (answers questions)
 
 ### Communication Channels
@@ -16,14 +16,14 @@ Implement a Go-based WebSocket server that simulates a conversation between two 
 ┌─────────────┐      ┌────────┐      ┌─────────┐
 │ Bob Client  │◄────►│  Bob   │◄────►│  Bob    │
 │  (Port      │  WS  │ Server │ Chan │   AI    │
-│   3002)     │      └────────┘      └────┬────┘
+│   8004)     │      └────────┘      └────┬────┘
 └─────────────┘                           │
                                           │ Chan
                                           ▼
 ┌─────────────┐      ┌────────┐      ┌─────────┐
 │Alice Client │◄────►│ Alice  │◄────►│  Alice  │
 │  (Port      │  WS  │ Server │ Chan │   AI    │
-│   3001)     │      └────────┘      └─────────┘
+│   8003)     │      └────────┘      └─────────┘
 └─────────────┘
 ```
 
@@ -94,7 +94,7 @@ type ConversationMessage struct {
 ```
 
 **File: `config/config.go`**
-- Define port numbers (3001 for Alice, 3002 for Bob)
+- Define port numbers (8003 for Alice, 8004 for Bob)
 - AI API keys and endpoints
 - Audio generation settings
 - Channel buffer sizes
@@ -102,7 +102,7 @@ type ConversationMessage struct {
 ### Phase 3: Implement WebSocket Servers
 
 **File: `internal/server/aliceserver.go`**
-- Create WebSocket server listening on port 3001
+- Create WebSocket server listening on port 8003
 - Accept only one client connection at a time
 - When connection closes, listen for new connection
 - Receive messages from client (if any - Alice is mostly receive-only)
@@ -112,7 +112,7 @@ type ConversationMessage struct {
 - Handle connection errors and reconnection
 
 **File: `internal/server/bobserver.go`**
-- Create WebSocket server listening on port 3002
+- Create WebSocket server listening on port 8004
 - Accept only one client connection at a time
 - When connection closes, listen for new connection
 - Receive messages from Bob client (initial question/input)
@@ -229,8 +229,8 @@ github.com/sashabaranov/go-openai
 
 ### Environment Variables
 ```
-ALICE_PORT=3001
-BOB_PORT=3002
+ALICE_PORT=8003
+BOB_PORT=8004
 ANTHROPIC_API_KEY=sk-...
 AUDIO_DIR=/public/audio
 ```
@@ -284,8 +284,8 @@ AUDIO_DIR=/public/audio
 
 ## Success Criteria
 
-1. ✓ Bob client can connect to port 3002
-2. ✓ Alice client can connect to port 3001
+1. ✓ Bob client can connect to port 8004
+2. ✓ Alice client can connect to port 8003
 3. ✓ Bob can send initial message and receive response
 4. ✓ Alice receives questions and can display them
 5. ✓ Conversation flows: Bob → Alice → Bob (with context)

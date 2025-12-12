@@ -5,7 +5,7 @@ export interface Message {
   text?: string;
 }
 
-const WS_URL = 'ws://localhost:3002';
+const WS_URL = 'ws://localhost:8004';
 
 export const MESSAGE_TYPE_RESET = 'reset';
 export const MESSAGE_TYPE_RESET_ACK = 'reset_ack';
@@ -66,7 +66,7 @@ export function useWebSocket(onMessage: (message: Message) => void, onResetAck?:
           reconnectTimeoutRef.current = window.setTimeout(() => {
             console.log('Attempting to reconnect...');
             connectRef.current();
-          }, 3001);
+          }, 8003);
         };
 
         ws.onerror = (error) => {

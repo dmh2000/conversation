@@ -4,7 +4,7 @@ A cyberpunk-themed React application for interacting with the AI conversation sy
 
 ## Overview
 
-Bob Client is a web-based interface that allows users to compose questions and send them to Alice through the AI Server. It features a modern cyberpunk/synthwave aesthetic with neon cyan and magenta colors, animated grid backgrounds, and glowing text effects. The client connects via WebSocket to the AI Server's BobServer endpoint (port 3002) and displays text responses with smooth animations.
+Bob Client is a web-based interface that allows users to compose questions and send them to Alice through the AI Server. It features a modern cyberpunk/synthwave aesthetic with neon cyan and magenta colors, animated grid backgrounds, and glowing text effects. The client connects via WebSocket to the AI Server's BobServer endpoint (port 8004) and displays text responses with smooth animations.
 
 ## Quick Start
 
@@ -75,7 +75,7 @@ src/
 
 - Node.js 18+
 - npm or yarn
-- AI Server running on port 3002
+- AI Server running on port 8004
 
 ### Scripts
 
@@ -86,7 +86,7 @@ src/
 
 ### Environment
 
-**WebSocket Connection**: The application connects to `ws://localhost:3002` (BobServer endpoint on the AI Server). This is configured in `src/services/websocketClient.ts` line 7.
+**WebSocket Connection**: The application connects to `ws://localhost:8004` (BobServer endpoint on the AI Server). This is configured in `src/services/websocketClient.ts` line 7.
 
 **Development Server**: The client runs on `http://localhost:5174` by default (Vite dev server).
 
@@ -123,7 +123,7 @@ Message display component (`src/components/MessageDisplay.tsx:1`)
 WebSocket connection hook (`src/services/websocketClient.ts:9`)
 
 **Capabilities:**
-- Establishes WebSocket connection to `ws://localhost:3002`
+- Establishes WebSocket connection to `ws://localhost:8004`
 - Auto-reconnection with 3-second delay on disconnect
 - Message parsing (JSON format)
 - Connection status tracking
@@ -199,7 +199,7 @@ Modern browsers with support for:
 
 ### WebSocket Connection Issues
 
-- Ensure AI Server is running on port 3002
+- Ensure AI Server is running on port 8004
 - Check browser console for connection errors
 - Verify firewall settings
 
@@ -251,13 +251,13 @@ Bob Client is one part of a larger AI conversation system:
 │   Bob Client    │ (This app - Port 5174)
 │   React + WS    │
 └────────┬────────┘
-         │ WebSocket (ws://localhost:3002)
+         │ WebSocket (ws://localhost:8004)
          ▼
 ┌─────────────────┐
 │   AI Server     │ (Go server in ../ai-server/)
 │                 │
 │  ┌───────────┐  │
-│  │ BobServer │  │ Port 3002 (WebSocket)
+│  │ BobServer │  │ Port 8004 (WebSocket)
 │  └─────┬─────┘  │
 │        │        │
 │  ┌─────▼─────┐  │
@@ -269,10 +269,10 @@ Bob Client is one part of a larger AI conversation system:
 │  └─────┬─────┘  │
 │        │        │
 │  ┌─────▼─────┐  │
-│  │AliceServer│  │ Port 3001 (WebSocket)
+│  │AliceServer│  │ Port 8003 (WebSocket)
 │  └───────────┘  │
 └─────────┬───────┘
-          │ WebSocket (ws://localhost:3001)
+          │ WebSocket (ws://localhost:8003)
           ▼
 ┌─────────────────┐
 │  Alice Client   │ (Separate app - Port 5173)

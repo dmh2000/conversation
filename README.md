@@ -12,26 +12,26 @@ The system consists of three main components:
 ┌─────────────┐      ┌────────────┐      ┌─────────────┐
 │ Bob Client  │◄────►│  AI Server │◄────►│Alice Client │
 │  (React)    │  WS  │   (Go)     │  WS  │  (React)    │
-│  :5174      │      │  :3001/:3002      │  :5173      │
+│  :5174      │      │  :8003/:8004      │  :5173      │
 └─────────────┘      └────────────┘      └─────────────┘
 ```
 
 ### Components
 
 1. **AI Server** (`ai-server/`) - Go-based WebSocket server
-   - BobServer: WebSocket server on port 3002
-   - AliceServer: WebSocket server on port 3001
+   - BobServer: WebSocket server on port 8004
+   - AliceServer: WebSocket server on port 8003
    - BobAI: Goroutine that simulates Bob persona
    - AliceAI: Goroutine that simulates Alice persona
    - Channel-based communication between components
 
 2. **Alice Client** (`alice/client/`) - React web app
-   - Connects to AI Server on port 3001
+   - Connects to AI Server on port 8003
    - Receives and displays answers from Alice AI
    - Audio playback with WaveSurfer visualization
 
 3. **Bob Client** (`bob/client/`) - React web app
-   - Connects to AI Server on port 3002
+   - Connects to AI Server on port 8004
    - Sends questions to Bob AI
    - Receives and displays responses
    - Audio playback with WaveSurfer visualization
@@ -79,8 +79,8 @@ go build -o ai-server ./cmd/main.go
 ```
 
 The AI server will start:
-- Alice WebSocket: `ws://localhost:3001`
-- Bob WebSocket: `ws://localhost:3002`
+- Alice WebSocket: `ws://localhost:8003`
+- Bob WebSocket: `ws://localhost:8004`
 
 ### 2. Start the Alice Client
 
@@ -145,19 +145,19 @@ All WebSocket messages use JSON:
 ### AI Server
 
 Environment variables:
-- `ALICE_PORT`: Alice WebSocket port (default: 3001)
-- `BOB_PORT`: Bob WebSocket port (default: 3002)
+- `ALICE_PORT`: Alice WebSocket port (default: 8003)
+- `BOB_PORT`: Bob WebSocket port (default: 8004)
 - `AUDIO_DIR`: Audio files directory (default: ./public/audio)
 - `CHANNEL_BUFFER`: Channel buffer size (default: 10)
 
 ### Alice Client
 
 Environment variables:
-- `VITE_WS_URL`: WebSocket URL (default: ws://localhost:3001)
+- `VITE_WS_URL`: WebSocket URL (default: ws://localhost:8003)
 
 ### Bob Client
 
-WebSocket URL is configured in `src/App.tsx` (default: ws://localhost:3002)
+WebSocket URL is configured in `src/App.tsx` (default: ws://localhost:8004)
 
 ## Current Implementation Status
 

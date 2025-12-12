@@ -58,7 +58,7 @@ antigravity/
         *   Listen for incoming connections from the web app.
         *   Maintain a list of connected clients.
     3.  **TCP Listener**:
-        *   Listen on a dedicated TCP port (e.g., 3001).
+        *   Listen on a dedicated TCP port (e.g., 8003).
         *   **Protocol**: Raw TCP stream.
         *   **Parsing**: Buffer incoming data. Detect messages starting with `{` and ending with `}`.
         *   **Forwarding**: Parse the JSON. If valid, broadcast to all connected WebSocket clients.
@@ -101,7 +101,7 @@ antigravity/
 2.  Open the web app.
 3.  Use `netcat` or a custom script to send a TCP message:
     ```bash
-    echo '{ "text": "Hello", "audio": "https://example.com/sound.mp3" }' | nc localhost 3001
+    echo '{ "text": "Hello", "audio": "https://example.com/sound.mp3" }' | nc localhost 8003
     ```
 4.  Verify text updates and audio plays.
 

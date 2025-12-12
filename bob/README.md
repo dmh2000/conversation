@@ -5,7 +5,7 @@ Bob is a React-based web application that allows users to send questions to Alic
 ## Architecture
 
 ```
-User Input → Bob Client (React) → WebSocket (Port 3002) → AI Server
+User Input → Bob Client (React) → WebSocket (Port 8004) → AI Server
                                                               ↓
                                                           Bob AI Persona
                                                               ↓
@@ -17,7 +17,7 @@ User Input → Bob Client (React) → WebSocket (Port 3002) → AI Server
 **Key Components:**
 - **Bob Client**: React web application (this directory)
 - **AI Server**: Go-based WebSocket server managing communication between Bob and Alice personas
-- **Port 3002**: Bob client connects to BobServer WebSocket endpoint
+- **Port 8004**: Bob client connects to BobServer WebSocket endpoint
 
 ## Features
 
@@ -60,7 +60,7 @@ bob/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- AI Server running on port 3002
+- AI Server running on port 8004
 
 ### Install Dependencies
 
@@ -100,7 +100,7 @@ npm run preview
 The WebSocket connection URL is configured in `src/App.tsx`:
 
 ```typescript
-const ws = new WebSocket('ws://localhost:3002');
+const ws = new WebSocket('ws://localhost:8004');
 ```
 
 To change the port, edit line 28 in `src/App.tsx`.
@@ -264,7 +264,7 @@ The textarea includes a smart word counter:
 ### Cannot Connect to WebSocket
 
 - Ensure AI Server is running: `cd ../../ai-server && ./ai-server`
-- Check that port 3002 is not blocked by firewall
+- Check that port 8004 is not blocked by firewall
 - Verify WebSocket URL in browser console
 - Check server logs for connection attempts
 
@@ -292,7 +292,7 @@ The textarea includes a smart word counter:
 
 Bob client integrates with the Go-based AI Server architecture:
 
-1. **Connection**: Connects to BobServer WebSocket endpoint (port 3002)
+1. **Connection**: Connects to BobServer WebSocket endpoint (port 8004)
 2. **Send Question**: User submits question from Bob client
 3. **Server Processing**:
    - BobServer receives question
@@ -303,10 +303,10 @@ Bob client integrates with the Go-based AI Server architecture:
 4. **Display Response**: Bob client receives and displays the response with animated effects
 
 **AI Server Components** (located in `ai-server/` directory):
-- **BobServer**: WebSocket server on port 3002 for Bob clients
+- **BobServer**: WebSocket server on port 8004 for Bob clients
 - **Bob AI**: Persona that handles question processing and conversation management
 - **Alice AI**: Persona that generates answers
-- **AliceServer**: WebSocket server on port 3001 for Alice clients (displays the conversation from Alice's perspective)
+- **AliceServer**: WebSocket server on port 8003 for Alice clients (displays the conversation from Alice's perspective)
 
 **Message Flow**: Bob Client → BobServer → Bob AI → Alice AI → Bob AI → BobServer → Bob Client
 
@@ -325,7 +325,7 @@ Bob client integrates with the Go-based AI Server architecture:
          │ WebSocket
          ▼
 ┌─────────────────┐
-│  BobServer      │ (Port 3002, in ai-server/)
+│  BobServer      │ (Port 8004, in ai-server/)
 └────────┬────────┘
          │ Go Channel
          ▼

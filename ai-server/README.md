@@ -7,8 +7,8 @@ A Go-based WebSocket server that orchestrates a conversation between two AI pers
 The server consists of 6 main components:
 
 ### WebSocket Servers
-- **BobServer**: WebSocket server on port 3002 for Bob web client connections
-- **AliceServer**: WebSocket server on port 3001 for Alice web client connections
+- **BobServer**: WebSocket server on port 8004 for Bob web client connections
+- **AliceServer**: WebSocket server on port 8003 for Alice web client connections
 
 ### AI Personas
 - **Bob AI**: LLM-powered persona that generates follow-up questions based on conversation context
@@ -28,8 +28,8 @@ ai-server/
 │   └── main.go                 # Entry point and orchestration
 ├── internal/
 │   ├── server/
-│   │   ├── aliceserver.go      # Alice WebSocket server (port 3001)
-│   │   └── bobserver.go        # Bob WebSocket server (port 3002)
+│   │   ├── aliceserver.go      # Alice WebSocket server (port 8003)
+│   │   └── bobserver.go        # Bob WebSocket server (port 8004)
 │   ├── ai/
 │   │   ├── aliceai.go          # Alice AI persona with LLM integration
 │   │   ├── alice-system.md     # Alice system prompt (embedded)
@@ -50,7 +50,7 @@ ai-server/
 
 - **Go 1.25.3** or later
 - **Google Cloud API Key** with Gemini API access (set via `GOOGLE_API_KEY` environment variable)
-- **Network Access**: Ports 3001 and 3002 available for WebSocket servers
+- **Network Access**: Ports 8003 and 8004 available for WebSocket servers
 
 ## Building
 
@@ -80,7 +80,7 @@ go run ./cmd/main.go
 **Expected Output:**
 ```
 [cmd/main.go:17] Starting AI Server...
-[cmd/main.go:21] Configuration: Alice port=3001, Bob port=3002
+[cmd/main.go:21] Configuration: Alice port=8003, Bob port=8004
 [internal/ai/aliceai.go:51] Alice AI started
 [internal/ai/bobai.go:49] Bob AI started
 [cmd/main.go:67] AI Server is running. Press Ctrl+C to stop.
@@ -94,15 +94,15 @@ Environment variables:
 - `GOOGLE_API_KEY`: Google Cloud API key for Gemini API access
 
 **Optional:**
-- `ALICE_PORT`: Port for Alice WebSocket server (default: 3001)
-- `BOB_PORT`: Port for Bob WebSocket server (default: 3002)
+- `ALICE_PORT`: Port for Alice WebSocket server (default: 8003)
+- `BOB_PORT`: Port for Bob WebSocket server (default: 8004)
 - `CHANNEL_BUFFER`: Buffer size for Go channels (default: 10)
 
 **Example:**
 ```bash
 export GOOGLE_API_KEY="AIza..."
-export ALICE_PORT=3001
-export BOB_PORT=3002
+export ALICE_PORT=8003
+export BOB_PORT=8004
 export CHANNEL_BUFFER=10
 ```
 
@@ -206,15 +206,15 @@ Bob client will be available at `http://localhost:5174`
 8. Open Alice client (`http://localhost:5173`) to see Alice's perspective
 
 **Connection Details:**
-- Bob client ↔ BobServer: WebSocket on port 3002
-- Alice client ↔ AliceServer: WebSocket on port 3001
+- Bob client ↔ BobServer: WebSocket on port 8004
+- Alice client ↔ AliceServer: WebSocket on port 8003
 - Bob AI ↔ Alice AI: Go channels (internal)
 
 ## Current Implementation Status
 
 ### Completed Features ✅
 
-- **WebSocket Servers**: Fully functional servers for Alice (3001) and Bob (3002)
+- **WebSocket Servers**: Fully functional servers for Alice (8003) and Bob (8004)
 - **Channel-based Architecture**: Concurrent, thread-safe communication via Go channels
 - **LLM Integration**: Google Gemini 2.5 Pro integration via go-llmclient
 - **Conversation Context**: Both AI personas maintain conversation history
@@ -264,7 +264,7 @@ The server uses **Google Gemini 2.5 Pro** via the `go-llmclient` library:
 
 ```
 ┌─────────────┐
-│  BobServer  │ Port 3002
+│  BobServer  │ Port 8004
 └──────┬──────┘
        │ channel (bobServerToAI)
        ▼
@@ -279,7 +279,7 @@ The server uses **Google Gemini 2.5 Pro** via the `go-llmclient` library:
        │ channel (aliceAIToServer)
        ▼
 ┌─────────────┐
-│ AliceServer │ Port 3001
+│ AliceServer │ Port 8003
 └─────────────┘
 ```
 
@@ -320,7 +320,7 @@ export GOOGLE_API_KEY="your-api-key-here"
 **Problem:** Clients can't connect to server
 **Solution:**
 - Verify server is running: Look for "AI Server is running" message
-- Check ports are not in use: `lsof -i :3001` and `lsof -i :3002`
+- Check ports are not in use: `lsof -i :8003` and `lsof -i :8004`
 - Verify firewall settings
 
 ### AI Responses Not Generating
@@ -356,8 +356,8 @@ export CHANNEL_BUFFER=50
 go run ./cmd/main.go
 
 # In another terminal, check WebSocket endpoints
-wscat -c ws://localhost:3002  # Bob server
-wscat -c ws://localhost:3001  # Alice server
+wscat -c ws://localhost:8004  # Bob server
+wscat -c ws://localhost:8003  # Alice server
 ```
 
 ## Architecture Diagram
@@ -368,7 +368,7 @@ wscat -c ws://localhost:3001  # Alice server
 │                                                                │
 │  ┌─────────────┐    ┌──────────────┐    ┌─────────────┐      │
 │  │  BobServer  │───▶│   Bob AI     │───▶│  Alice AI   │      │
-│  │  (Port 3002)│◀───│  (Goroutine) │◀───│ (Goroutine) │      │
+│  │  (Port 8004)│◀───│  (Goroutine) │◀───│ (Goroutine) │      │
 │  └──────┬──────┘    └──────────────┘    └──────┬──────┘      │
 │         │                                        │             │
 │         │                                        │             │
