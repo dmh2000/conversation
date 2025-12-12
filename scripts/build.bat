@@ -4,19 +4,20 @@ REM stop all services
 call kill.bat >nul 2>&1
 
 REM build alice/client
-pushd alice\client
+cd alice\client
 echo build alice/client
 call npm run build
-popd
+cd ..\..
 
 REM build bob/client
-pushd bob\client
+cd bob\client
 echo build bob/client
 call npm run build
-popd
+cd ..\..
 
 REM build ai-server
-pushd ai-server\cmd
+cd ai-server\cmd
 echo build ai-server/cmd
 go build -o ..\ai-server.exe
-popd
+cd ..\..
+dir ai-server\ai-server.exe

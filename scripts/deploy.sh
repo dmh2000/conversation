@@ -35,6 +35,3 @@ popd
 pushd ai-server
 ./ai-server &
 popd
-
-
-~/nginx-local/sbin/nginx -p $HOME/nginx-local -c conf/nginx.conf
