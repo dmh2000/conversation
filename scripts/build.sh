@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# stop all services
-./kill.sh >/dev/null 2>&1
-
 # build alice/client
 pushd alice/client
 echo "build alice/client"

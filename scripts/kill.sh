@@ -7,4 +7,4 @@ pgrep -a ai-server | grep ai-server
 pgrep -a ai-server | grep ai-server  | awk '{print $1}' | xargs kill 2> /dev/null
 
 pgrep -a nginx | grep nginx  
-start d:\nginx-1.29.4\nginx -c conf\nginx.conf
+~/nginx-local/sbin/nginx -s stop
