@@ -5,7 +5,8 @@ export interface Message {
   text?: string;
 }
 
-const WS_URL = 'ws://localhost:8004';
+// WSS FOR DEPLOY, WS FOR TEST
+const WS_URL = 'wss://sqirvy.com:8004';
 
 export const MESSAGE_TYPE_RESET = 'reset';
 export const MESSAGE_TYPE_RESET_ACK = 'reset_ack';
