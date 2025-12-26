@@ -6,7 +6,10 @@ export interface Message {
 }
 
 // WSS FOR DEPLOY, WS FOR TEST
-const WS_URL = 'wss://sqirvy.com:8003';
+const WS_URL =
+  (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+  window.location.host +
+  '/ws';
 
 export const MESSAGE_TYPE_RESET = 'reset';
 export const MESSAGE_TYPE_RESET_ACK = 'reset_ack';
@@ -43,12 +46,9 @@ export function useWebSocket(onMessage: (message: Message) => void, onResetAck?:
             const message = JSON.parse(event.data) as Message;
             console.log('Received message:', message);
 
-            // Handle reset acknowledgment
             if (message.type === MESSAGE_TYPE_RESET_ACK) {
               console.log('Reset acknowledged by server');
-              if (onResetAckRef.current) {
-                onResetAckRef.current();
-              }
+              onResetAckRef.current?.();
               return;
             }
 
@@ -57,6 +57,7 @@ export function useWebSocket(onMessage: (message: Message) => void, onResetAck?:
             console.error('Failed to parse message:', error);
           }
         };
+
 
         ws.onclose = () => {
           console.log('WebSocket disconnected');
@@ -67,7 +68,7 @@ export function useWebSocket(onMessage: (message: Message) => void, onResetAck?:
           reconnectTimeoutRef.current = window.setTimeout(() => {
             console.log('Attempting to reconnect...');
             connectRef.current();
-          }, 8003);
+          }, 3000);
         };
 
         ws.onerror = (error) => {

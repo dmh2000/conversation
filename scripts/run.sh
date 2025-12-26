@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # stop all services
-./kill.sh >/dev/null 2>&1
+pgrep -a python | grep client/dist
+pgrep -a python | grep client/dist   | awk '{print $1}' | xargs kill 2> /dev/null
+
+pgrep -a ai-server | grep ai-server   
+pgrep -a ai-server | grep ai-server  | awk '{print $1}' | xargs kill 2> /dev/null
+
 
 # start alice/server 
 pushd alice/server
