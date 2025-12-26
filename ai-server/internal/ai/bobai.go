@@ -199,6 +199,7 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 
 	// Step 1: add alice response to context
 	b.context = append(b.context, answerFromAlice.Text)
+	logger.Printf("---> alice %s", answerFromAlice.Text)
 
 	// issue query to alice
 	question, err := b.client.QueryText(context.Background(), systemPromptBob, b.context, llm_model, llmclient.Options{})
@@ -206,6 +207,8 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 		fmt.Println(err)
 		return answerFromAlice, err
 	}
+
+	logger.Printf("<-- bob  %s", question)
 
 	// makie sure the questions the ai generated is in the proper xml format
 	question = validateQuestion(question)

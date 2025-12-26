@@ -174,6 +174,7 @@ func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.Co
 		a.client = client
 	}
 
+	logger.Printf("--->bob: %s", msg.Text)
 	// Step 1: add bobs question to context
 	bob_says := msg.Text
 	a.context = append(a.context, bob_says)
@@ -184,6 +185,7 @@ func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.Co
 		fmt.Println(err)
 		return msg, err
 	}
+	logger.Printf("<---alice: %s", alice_says)
 
 	alice_says = validateResonse(alice_says)
 
