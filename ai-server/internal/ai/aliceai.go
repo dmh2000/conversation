@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/xml"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -13,7 +12,7 @@ import (
 	llmclient "github.com/dmh2000/go-llmclient"
 )
 
-const llm_model = "gemini-2.5-pro"
+const llmModel = "gemini-2.5-pro"
 
 // Alice System Prompt
 //
@@ -28,6 +27,8 @@ type AliceAI struct {
 	toBob       chan<- types.ConversationMessage
 	context     []string
 	client      llmclient.Client
+	clientOnce  sync.Once
+	clientErr   error
 	paused      bool
 	pauseMutex  sync.Mutex
 }
@@ -147,13 +148,13 @@ type AliceQuestion struct {
 	Text    string   `xml:"response"`
 }
 
-func validateResonse(response string) string {
+func validateResponse(response string) string {
 	var r AliceQuestion
 	err := xml.Unmarshal([]byte(response), &r)
 	if err != nil {
 		logger.Printf("Error unmarshalling response: %s", response)
 		logger.Printf("Error: %v", err)
-		if err.Error() == "unexpected EOF" {
+		if strings.Contains(err.Error(), "unexpected EOF") {
 			// add the terminator to the response
 			return response + "</alice>"
 		}
@@ -163,57 +164,43 @@ func validateResonse(response string) string {
 }
 
 func (a *AliceAI) createResponseMessage(msg types.ConversationMessage) (types.ConversationMessage, error) {
-
-	if a.client == nil {
-		// create llm client
+	// Thread-safe lazy initialization of client
+	a.clientOnce.Do(func() {
 		client, err := llmclient.NewClient("gemini")
 		if err != nil {
-			fmt.Println(err)
-			return msg, err
+			logger.Printf("Error creating LLM client: %v", err)
+			a.clientErr = err
+			return
 		}
 		a.client = client
+	})
+
+	if a.clientErr != nil {
+		return msg, a.clientErr
 	}
 
 	logger.Printf("--->bob: %s", msg.Text)
 	// Step 1: add bobs question to context
-	bob_says := msg.Text
-	a.context = append(a.context, bob_says)
+	bobSays := msg.Text
+	a.context = append(a.context, bobSays)
 
 	// issue query to alice
-	alice_says, err := a.client.QueryText(context.Background(), systemPrompt, a.context, llm_model, llmclient.Options{})
+	aliceSays, err := a.client.QueryText(context.Background(), systemPrompt, a.context, llmModel, llmclient.Options{})
 	if err != nil {
-		fmt.Println(err)
+		logger.Printf("Error querying LLM: %v", err)
 		return msg, err
 	}
-	logger.Printf("<---alice: %s", alice_says)
+	logger.Printf("<---alice: %s", aliceSays)
 
-	alice_says = validateResonse(alice_says)
+	aliceSays = validateResponse(aliceSays)
 
 	// add alice to context
-	a.context = append(a.context, alice_says)
+	a.context = append(a.context, aliceSays)
 
 	// create AI response
 	aiMsg := types.ConversationMessage{
-		Text: alice_says,
+		Text: aliceSays,
 	}
 
-	// create UI response
-	text := strings.TrimPrefix(alice_says, "<alice>")
-	text = strings.TrimSuffix(text, "</alice>")
-
-	// create the UI msg
-	uiMsg := types.ConversationMessage{
-		Text: text,
-	}
-
-	// send it display
-	select {
-	case a.toAliceUI <- uiMsg:
-		logger.Println("Bob AI sent acknowledgment to server")
-	default:
-		logger.Println("Bob server channel full, dropping acknowledgment")
-	}
-
-	return aiMsg, err
-
+	return aiMsg, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/xml"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -26,6 +25,8 @@ type BobAI struct {
 	fromAlice      <-chan types.ConversationMessage
 	context        []string
 	client         llmclient.Client
+	clientOnce     sync.Once
+	clientErr      error
 	paused         bool
 	pauseMutex     sync.Mutex
 	onStartNewConv func() // callback when new conversation starts
@@ -129,7 +130,7 @@ func (b *BobAI) processInitialMessage(input string) {
 	}
 
 	// Generate a question for Alice
-	question := fmt.Sprintf("<bob>%s</bob>", input)
+	question := "<bob>" + input + "</bob>"
 
 	// add question to Bob's context
 	b.context = append(b.context, question)
@@ -176,44 +177,48 @@ func validateQuestion(question string) string {
 	if err != nil {
 		logger.Printf("Error unmarshalling response: %s", question)
 		logger.Printf("Error: %v", err)
-		if err.Error() == "unexpected EOF" {
+		if strings.Contains(err.Error(), "unexpected EOF") {
 			// add the terminator to the response
 			return question + "</bob>"
 		}
-		return "<bob>Opps I lost my train of thought. Where was I?</bob>"
+		return "<bob>Oops, I lost my train of thought. Where was I?</bob>"
 	}
 	return question
 }
 
 func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage) (types.ConversationMessage, error) {
-
-	if b.client == nil {
-		// create llm client
+	// Thread-safe lazy initialization of client
+	b.clientOnce.Do(func() {
 		client, err := llmclient.NewClient("gemini")
 		if err != nil {
-			fmt.Println(err)
-			return answerFromAlice, err
+			logger.Printf("Error creating LLM client: %v", err)
+			b.clientErr = err
+			return
 		}
 		b.client = client
+	})
+
+	if b.clientErr != nil {
+		return answerFromAlice, b.clientErr
 	}
 
 	// Step 1: add alice response to context
 	b.context = append(b.context, answerFromAlice.Text)
 	logger.Printf("---> alice %s", answerFromAlice.Text)
 
-	// issue query to alice
-	question, err := b.client.QueryText(context.Background(), systemPromptBob, b.context, llm_model, llmclient.Options{})
+	// issue query to bob
+	question, err := b.client.QueryText(context.Background(), systemPromptBob, b.context, llmModel, llmclient.Options{})
 	if err != nil {
-		fmt.Println(err)
+		logger.Printf("Error querying LLM: %v", err)
 		return answerFromAlice, err
 	}
 
 	logger.Printf("<-- bob  %s", question)
 
-	// makie sure the questions the ai generated is in the proper xml format
+	// make sure the question the ai generated is in the proper xml format
 	question = validateQuestion(question)
 
-	// add alice to context
+	// add question to context
 	b.context = append(b.context, question)
 
 	logger.Printf("%s", question)
@@ -229,7 +234,7 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 		Text: text,
 	}
 
-	// send it display
+	// send to display
 	select {
 	case b.toBobUI <- uiMsg:
 		logger.Println("Bob AI sent acknowledgment to server")
@@ -237,6 +242,5 @@ func (b *BobAI) createQuestionToAlice(answerFromAlice types.ConversationMessage)
 		logger.Println("Bob server channel full, dropping acknowledgment")
 	}
 
-	return questionToAlice, err
-
+	return questionToAlice, nil
 }
