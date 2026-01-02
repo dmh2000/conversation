@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/dmh2000/ai-server/config"
@@ -62,18 +63,31 @@ func main() {
 		logger.Println("Alice AI resumed for new conversation")
 	})
 
+	// WaitGroup for graceful shutdown
+	var wg sync.WaitGroup
+
 	// Start AI components
-	go aliceAI.Start(ctx)
-	go bobAI.Start(ctx)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		aliceAI.Start(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		bobAI.Start(ctx)
+	}()
 
 	// Start servers in goroutines
+	wg.Add(2)
 	go func() {
+		defer wg.Done()
 		if err := aliceServer.Start(ctx); err != nil {
 			logger.Printf("Alice server error: %v", err)
 		}
 	}()
 
 	go func() {
+		defer wg.Done()
 		if err := bobServer.Start(ctx); err != nil {
 			logger.Printf("Bob server error: %v", err)
 		}
@@ -89,7 +103,7 @@ func main() {
 	logger.Println("Shutting down AI Server...")
 	cancel()
 
-	// Give goroutines time to clean up
-	// In a production app, you'd use a WaitGroup here
+	// Wait for all goroutines to complete
+	wg.Wait()
 	logger.Println("AI Server stopped")
 }

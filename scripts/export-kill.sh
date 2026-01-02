@@ -9,5 +9,5 @@ pgrep -a ai-server | grep ai-server  | awk '{print $1}' | xargs kill 2> /dev/nul
 
 echo services stopped
 
-# pgrep -a nginx | grep nginx  
-# ~/nginx-local/sbin/nginx -s stop
+pgrep -a nginx | grep nginx  
+~/nginx-local/sbin/nginx -s stop

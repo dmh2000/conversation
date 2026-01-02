@@ -4,12 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Purpose
 
-This repository is a comparison project for evaluating different AI coding assistants. It contains identical prompts for building the same web application, with separate directories for implementations by different AI assistants (Alice and Bob).
+This repository is a comparison project for evaluating different AI coding assistants. It contains identical prompts for building the same web application, with separate directories for implementations by different AI assistants (Alice and Bob). It also includes a Go-based AI server that orchestrates conversations between the two personas using Google Gemini.
 
 ## Project Structure
 
 ```
 conversation/
+├── ai-server/       # Go-based AI orchestration server (Gemini 2.5 Pro)
+│   ├── cmd/         # Entry point (main.go)
+│   ├── internal/    # Server, AI personas, logger, types
+│   └── config/      # Environment-based configuration
 ├── alice/           # Implementation by Alice AI
 │   ├── server/      # Node.js + Express + WebSocket server
 │   └── client/      # Vite + React + TypeScript frontend
@@ -17,12 +21,44 @@ conversation/
 │   ├── server/      # Node.js + Express + WebSocket server
 │   └── client/      # Vite + React + TypeScript frontend
 ├── prompts/         # Prompt specifications and plans
-└── antigravity/     # Additional implementation
+├── scripts/         # Build, deploy, and run scripts
+│   └── nginx/       # Nginx configuration for scripts
+├── proxy/           # Nginx reverse proxy configuration
+├── test/            # Test utilities
+│   └── ws/          # WebSocket testing
+└── presentation/    # HTML/CSS presentation files
 ```
 
 Each implementation (alice/, bob/) is self-contained with its own server and client subdirectories.
 
 ## Application Architecture
+
+### Overview
+
+**Full System Data Flow:**
+```
+User → Bob Client → ai-server → Gemini API → Alice AI → Alice Client
+                  ↓                         ↓
+              Bob AI ←──────────────────────┘
+```
+
+The ai-server orchestrates conversations between two AI personas (Bob and Alice), both powered by Google Gemini 2.5 Pro. Bob asks questions, Alice answers.
+
+### AI Server (Go)
+
+The `ai-server/` component is a Go-based WebSocket server that:
+- Runs Bob AI on port 8004 and Alice AI on port 8003
+- Uses channel-based concurrent architecture
+- Integrates with Google Gemini 2.5 Pro via `go-llmclient`
+- Maintains conversation context for both personas
+
+**Port Configuration:**
+- Alice WebSocket: 8003 (via `ALICE_PORT` env var)
+- Bob WebSocket: 8004 (via `BOB_PORT` env var)
+
+### Node.js Server Architecture (Legacy/Standalone)
+
+Both alice/server and bob/server can operate independently for TCP-based message relay:
 
 **Data Flow:** TCP Client → TCP Listener → WebSocket Server → React Web App → Display + Audio Playback
 
@@ -33,10 +69,6 @@ Each implementation (alice/, bob/) is self-contained with its own server and cli
   "audio": "string"  // Path to MP3 audio file (relative path like "/audio/file.mp3")
 }
 ```
-
-### Server Architecture
-
-Both implementations follow a similar pattern but with different code organization:
 
 **Alice Implementation:**
 - Modular structure with separate files:
@@ -70,6 +102,27 @@ Key components:
 - `websocketClient.ts` - WebSocket connection management hook
 
 ## Development Commands
+
+### AI Server (Go)
+
+```bash
+cd ai-server
+
+# Set required environment variable
+export GOOGLE_API_KEY="your-api-key-here"
+
+# Install dependencies
+go mod tidy
+
+# Build the server
+go build -o ai-server ./cmd/main.go
+
+# Run the server
+./ai-server
+
+# Or run directly for development
+go run ./cmd/main.go
+```
 
 ### Alice Implementation
 
@@ -107,15 +160,57 @@ npm start            # Run compiled JavaScript
 ```bash
 cd bob/client
 npm install          # Install dependencies
-npm run dev          # Start Vite dev server (http://localhost:5173)
+npm run dev          # Start Vite dev server (http://localhost:5174)
 npm run build        # Build for production
 npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
+### Scripts
+
+The `scripts/` directory contains helper scripts:
+
+```bash
+# Build scripts
+./scripts/build.sh       # Build all components
+
+# Run scripts
+./scripts/run.sh         # Run the full system
+./scripts/local-run.sh   # Run locally
+./scripts/local-kill.sh  # Kill local processes
+
+# Deploy scripts
+./scripts/deploy.sh      # Deploy to server
+
+# Export scripts (for external demonstrations)
+./scripts/export.sh
+./scripts/export-start.sh
+./scripts/export-kill.sh
+```
+
+## Port Configuration Summary
+
+| Component | Port | Environment Variable |
+|-----------|------|---------------------|
+| Alice WebSocket (ai-server) | 8003 | `ALICE_PORT` |
+| Bob WebSocket (ai-server) | 8004 | `BOB_PORT` |
+| Alice HTTP/WS (Node.js) | 3000 | `PORT` |
+| Alice TCP (Node.js) | 8080 | `TCP_PORT` |
+| Bob HTTP/WS (Node.js) | 3000 | - |
+| Bob TCP (Node.js) | 8003 | - |
+| Alice Client (Vite) | 5173 | - |
+| Bob Client (Vite) | 5174 | - |
+
 ## Key Technical Details
 
-### TCP Message Parsing
+### AI Server (Go)
+
+- Uses Google Gemini 2.5 Pro via `github.com/dmh2000/go-llmclient`
+- Channel-based concurrent architecture for thread-safe message passing
+- System prompts embedded via `//go:embed` from markdown files
+- XML message format between AI personas for structured parsing
+
+### TCP Message Parsing (Node.js servers)
 
 Both implementations handle streaming TCP data where JSON messages may arrive in fragments:
 
@@ -136,16 +231,6 @@ Both implementations handle streaming TCP data where JSON messages may arrive in
 - Connection status displayed in client UI
 - Messages are JSON-stringified for transmission
 
-### Port Configuration
-
-**Alice:**
-- HTTP/WebSocket: 3000 (configurable via PORT env var)
-- TCP: 8080 (configurable via TCP_PORT env var)
-
-**Bob:**
-- HTTP/WebSocket: 3000
-- TCP: 8003
-
 ## Working with This Repository
 
 1. Each implementation (alice/, bob/) should remain self-contained
@@ -153,3 +238,5 @@ Both implementations handle streaming TCP data where JSON messages may arrive in
 3. When modifying code, maintain consistency within each implementation's architecture
 4. Alice uses modular server structure; Bob uses monolithic structure
 5. Both clients use identical technology stack (Vite + React + TypeScript + WaveSurfer)
+6. The ai-server orchestrates AI conversations between personas using Gemini
+7. Use scripts in `scripts/` for common build/run/deploy operations
